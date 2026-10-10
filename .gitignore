@@ -17,3 +17,6 @@ venv/
 # 系统
 .DS_Store
 Thumbs.db
+
+# 本地一键推送脚本（不入远程）
+*.cmd
