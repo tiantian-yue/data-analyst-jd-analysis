@@ -370,6 +370,57 @@ ol li,ul li{color:var(--ink2);margin:5px 0}
 .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:4px;background:#f0f2f6;color:var(--ink3);margin-left:6px}
 @media(max-width:680px){.vs{grid-template-columns:1fr}.lbl{width:80px}.val{width:76px}}
 """
+# ---------- 十年变迁对照层：2016 拉勾(第三方公开数据集) vs 2026 自采 ----------
+# 设计原则：这份数据【只做趋势对照，绝不混入主样本】。
+# 原因：①它是一线口径，主样本主线是太原；②2016 年数据不含 AI 维度；③由他人采集，来源必须标注。
+T1_2016 = {"北京", "上海", "深圳", "广州", "杭州"}
+TS, TS_ROWS, TS_OK, N16, N16_ALL, N26_TS, TS_DATE = [], "", False, 0, 0, 0, "2016-09"
+try:
+    import importlib.util as _ilu
+    import openpyxl
+    _xl = os.path.join(BASE, "data", "external", "lagou2016_DataAnalyst_589.xlsx")
+    _sp = _ilu.spec_from_file_location("pj", os.path.join(BASE, "scripts", "parse_jd.py"))
+    _pj = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_pj)
+    _wb = openpyxl.load_workbook(_xl, read_only=True)
+    _ws = _wb[_wb.sheetnames[0]]
+    _rr = list(_ws.iter_rows(values_only=True))
+    _hh = list(_rr[0])
+    d16 = [dict(zip(_hh, r)) for r in _rr[1:] if r]
+    _ds = sorted({str(r["_createdate"])[:10] for r in d16 if r.get("_createdate")})
+    if _ds:
+        TS_DATE = _ds[0][:7]
+    a16 = [r for r in d16 if r.get("city") in T1_2016]      # 2016 一线口径
+    N16 = len(a16)
+    N16_ALL = len(d16)                                    # 数据集总量
+    c16 = collections.Counter()
+    for r in a16:
+        for _s in _pj.parse_skills(str(r.get("description") or "")):
+            c16[_s] += 1
+    b26 = FS_REAL                                           # 2026 一线/新一线真实岗
+    N26_TS = len(b26)
+    c26 = collections.Counter()
+    for x in b26:
+        for _s in filter(None, x["skills"].split("|")):
+            c26[_s] += 1
+    for k in ["Python", "SQL", "BI可视化", "数据清洗", "统计学", "Excel", "报表", "SPSS", "机器学习", "数据挖掘"]:
+        n1, n2 = c16.get(k, 0), c26.get(k, 0)
+        p1, p2 = n1 / N16, n2 / N26_TS
+        d = p2 - p1
+        se = math.sqrt(p1 * (1 - p1) / N16 + p2 * (1 - p2) / N26_TS)
+        lo, hi = (d - 1.96 * se) * 100, (d + 1.96 * se) * 100
+        sig = (lo > 0 or hi < 0)
+        TS.append((k, p1 * 100, p2 * 100, d * 100, lo, hi, sig, n1, n2))
+        col = "#c0392b" if d > 0 else "#1e8449"      # 涨红跌绿
+        arw = "↑" if d > 0 else "↓"
+        TS_ROWS += (f'<tr><td><b>{k}</b></td><td>{p1*100:.0f}%</td><td>{p2*100:.0f}%</td>'
+                    f'<td style="color:{col};font-weight:700">{arw}{abs(d)*100:.0f}pp</td>'
+                    f'<td>[{lo:+.0f}, {hi:+.0f}]pp</td>'
+                    f'<td><span class="pill" style="background:{"#e6f4ea" if sig else "#f2f4f8"};'
+                    f'color:{"#1e8449" if sig else "#7a8699"}">{("显著" if sig else "不显著")}</span></td></tr>')
+    TS_OK = True
+except Exception as _e:
+    TS_OK = False
+    TS_ROWS = ""
 
 html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -520,7 +571,30 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 它是太原 {MED_TY}K 和一线 {MED_FS}K 两个完全不同分布的混合平均。
 本次分析因此<b>放弃全国单一中位数，改用分城市口径</b>。「·N 薪」岗位已按年化折算（×N/12），「元/天」岗位按 21.75 个工作日折算月薪。</p>
 
-<h3>4.6 三个反直觉的洞察</h3>
+<h3>4.6 十年变迁：{TS_DATE} vs 2026 <span class="tag">第三方数据对照层</span></h3>
+<p>自采样本是<b>单日快照</b>，回答不了「技能需求怎么变」。所以引入一份第三方公开数据集做对照：
+<b>{TS_DATE} 拉勾网数据分析岗 {N16_ALL} 条</b>（GitHub 公开仓库，含 JD 全文）。
+为公平比较，两期都限定为<b>一线城市真实岗位</b>（2016：京沪深广杭 {N16} 条；2026：一线/新一线 {N26_TS} 条）。</p>
+<table>
+<tr><th>技能</th><th>{TS_DATE}</th><th>2026</th><th>变化</th><th>95%CI</th><th>判定</th></tr>
+{TS_ROWS}
+</table>
+<div class="hint g"><b>1｜涨得最快的是 Python（+48pp）和 BI 可视化（+32pp）。</b>
+十年前数据分析岗要求的是「会统计、会报表」，现在要求的是「会写代码、会搭看板」。
+SQL 也在涨（53%→81%），但它十年前就已经是主流 —— <b>SQL 是常青树，Python 和 BI 才是增量。</b></div>
+<div class="hint r"><b>2｜SPSS 是唯一显著崩溃的技能：33% → 6%。</b>
+十年前三分之一的数据分析岗点名要 SPSS，现在几乎绝迹。
+<b>如果你还在学校被教 SPSS，要意识到它在就业市场已经基本失效 —— 它对应的生态位被 Python 接管了。</b></div>
+<div class="hint"><b>3｜Excel 和报表十年没变（40%→33%、51%→59%，均不显著）。</b>
+这从时间维度印证了 4.7 节的判断：<b>Excel 是通用办公底子，十年前是、现在也是，因此撑不起溢价。</b>
+真正决定薪资的是那几项十年间翻倍的技能。</div>
+<div class="hint o"><b>对照层的口径边界（必须说清）：</b>
+①两期来自<b>不同平台</b>（拉勾 vs BOSS直聘）、<b>不同采集方式</b>（第三方爬虫 vs 本人截图 OCR），
+平台差异会混入估计；②2016 年城市只覆盖京沪深广杭，<b>太原仅 1 条，做不了二线的时间对比</b>；
+③2016 年 JD 中<b>不存在 AI 要求</b>，该维度无法做时间对比；
+④第三方数据<b>未混入主样本</b>，{N_VALID} 条统计口径保持不变。</div>
+
+<h3>4.7 三个反直觉的洞察</h3>
 <div class="hint g"><b>1｜工具是入场券，业务理解才是溢价。</b>
 工具要求密集的岗位集中在 5-13K（SQL + BI + 统计学是标配）；而样本薪资天花板（某大厂 35-45K·15 薪）的 JD 里
 <b>一个工具名都没有</b>，只谈经营分析体系、跨部门推动和 PMO。<b>越往上走，JD 越不谈工具。</b></div>
@@ -537,7 +611,7 @@ SQL 在一线是 81%、太原 54%；Excel 两地都在 30-45% 区间，且太原
 技能占比的 95% 置信区间约 <b>±{CI_REAL_SMALL}%</b>。因此上表只把 <b>SQL 和标题党比例</b>标为「已显著」，
 Python / 统计学 / BI / AI 一律标「待验证」——<b>宁可少下一个结论，也不假装一个结论。</b></li>
 <li><b>非随机采样</b>：来自 BOSS 搜索结果的前若干页，存在平台推荐算法偏差；且太原样本主要来自前期人工采集、一线样本主要来自后期 OCR 批次，两批采集方式不同</li>
-<li><b>单日快照</b>：{N_SCREEN} 张截图全部采集于 2026-10-09，无法观察时间趋势</li>
+<li><b>自采样本是单日快照</b>：{N_SCREEN} 张截图全部采集于 2026-10-09，靠它无法观察时间趋势。时间维度改为引入第三方 2016 年数据集做对照（见 4.6），已做城市口径对齐，但<b>两期平台与采集方式不同，趋势结论应理解为「方向」而非「精确幅度」</b></li>
 <li><b>OCR 误差</b>：识别准确率良好但有系统性错字（「职位详情」→「职位洋情」、「苏州」→「荔州」）。城市与公司名靠正则提取，存在误判（7 条公司名被地图地址、银行名替换），已人工核验修正</li>
 <li><b>归并规则是我定义的</b>：「有薪资 + 有描述 = 新 JD」这一假设对连续翻页成立，但若两次浏览同一岗位且中间夹了其他岗位，会算成两条。二次去重补回了 {N_DROP2} 条</li>
 <li><b>技能归并表主观</b>：SPSS / SAS 归统计学工具族、Tableau / PowerBI / 帆软归 BI 可视化 —— 换一套规则数字会不同</li>
@@ -556,9 +630,12 @@ Python / 统计学 / BI / AI 一律标「待验证」——<b>宁可少下一个
 <td>没直接用海外数据集：结论会偏离我要投的中国市场</td></tr>
 <tr><td>技能共现 / 词频可视化项目</td><td>技能别名归并字典思路</td>
 <td>没上 NLP / 词向量：{N_VALID} 条样本用规则表 + 人工复核更可控、可解释，也更容易向面试官讲清每一步</td></tr>
-<tr><td>二手 JD 数据集（和鲸社区等公开数据集）</td><td>—</td>
-<td>查过但没用：存量数据集多为 2022 年前数据 —— <b>ChatGPT 2022-11-30 才发布，2022 年的 JD 里不可能有 AI 技能要求维度</b>，
-答不了「2026 年该学什么」；且多为单城市（长沙），无太原样本</td></tr>
+<tr><td>二手 JD 数据集<br>（GitHub 公开仓库 / 和鲸社区）</td>
+<td><b>时间对比层的思路</b>：用第三方历史数据，补上自采单日快照缺失的时间维度</td>
+<td>只采纳 1 份（GitHub 公开仓库 <code>BigCarrey/Data_analysis_in_lagou</code>，{TS_DATE} 拉勾 {N16_ALL} 条，取一线口径 {N16} 条）并<b>仅作对照、不混入主样本</b>：
+①它是一线城市口径，直接混入会污染太原主线；②2016 年数据<b>不可能包含 AI 技能要求</b>（ChatGPT 2022-11-30 才发布）；
+③该数据由他人采集，已在报告中显式标注来源，<b>不冒充自采</b>。<br>
+和鲸那份（2880 条，带 tags 技能标签）查过但没用：直链返回登录墙且标注「同校用户禁止下载」，且同为 2022 年前数据</td></tr>
 </table>
 
 <div class="quote"><b>面试可以讲的三句话：</b><br>
