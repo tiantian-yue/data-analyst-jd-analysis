@@ -53,6 +53,11 @@ def main():
         files.extend(glob.glob(os.path.join(src, e)))
         files.extend(glob.glob(os.path.join(src, e.upper())))
     files = sorted(set(files))
+    if "--new-only" in sys.argv:
+        before = len(files)
+        files = [f for f in files
+                 if not os.path.exists(os.path.join(out, os.path.splitext(os.path.basename(f))[0] + ".txt"))]
+        print(f"[增量模式] 总 {before} 张，已处理 {before - len(files)} 张，待处理 {len(files)} 张")
     if not files:
         print(f"[!] 目录里没有图片: {os.path.abspath(src)}")
         return

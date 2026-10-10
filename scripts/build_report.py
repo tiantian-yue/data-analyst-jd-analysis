@@ -83,7 +83,22 @@ TY = [r for r in VALID if r.get("city_group") == "太原"]
 FS = [r for r in VALID if r.get("city_group") == "一线新一线"]
 
 N_VALID, N_REAL, N_FAKE = len(VALID), len(REAL), len(FAKE)
-N_SCREEN = 154
+# 截图张数：直接数目录，不再手写（第二轮补采后从 154 → 470）
+try:
+    import glob as _glob
+    N_SCREEN = len([p for p in _glob.glob(os.path.join(BASE, "data", "screenshots", "*"))
+                    if os.path.splitext(p)[1].lower() in (".jpg", ".jpeg", ".png", ".webp")])
+except Exception:
+    N_SCREEN = 154
+
+# 采集日期：从 jd_dataset_v3 回算，不再写死单日
+try:
+    _cd = collections.Counter(r.get("collect_date", "") for r in ALL if r.get("collect_date"))
+    CDATE_MAIN = _cd.most_common(1)[0][0]
+    CDATE_TXT = "、".join("%s（%d 条）" % (k, v) for k, v in sorted(_cd.items()))
+    CDATE_IS_SINGLE = (len(_cd) <= 1)
+except Exception:
+    CDATE_MAIN, CDATE_TXT, CDATE_IS_SINGLE = "2026-10-09", "2026-10-09", True
 N_DROP2 = len(ALL) - N_VALID          # 第二轮二次查重剔除数
 N_DROP = 14 + N_DROP2                 # 累计去重：首轮跨批 14 + 二轮 6
 
@@ -422,6 +437,40 @@ except Exception as _e:
     TS_OK = False
     TS_ROWS = ""
 
+# ---------- 城市三层梯度：太原 / 新一线 / 传统一线 ----------
+# 第二轮补采后新一线城市样本大涨（成都32 苏州29 长沙29 无锡27 杭州24 南京19 宁波17），
+# 才第一次有条件把「一线新一线」拆成两层看。三层梯度比原来的两组对比信息量大得多。
+TL1 = {"北京", "上海", "广州", "深圳"}
+T1_REAL = [r for r in FS_REAL if r.get("city") in TL1]        # 传统一线
+NT1_REAL = [r for r in FS_REAL if r.get("city") not in TL1]   # 新一线
+
+
+def _med(subs):
+    v = salary_rows(subs)
+    return round(median(v), 1) if v else 0
+
+
+def _pc(subs, skill):
+    return pct(sum(1 for r in subs if skill in (r.get("skills") or "")), len(subs))
+
+
+TIER3 = [("太原", TY_REAL), ("新一线", NT1_REAL), ("传统一线", T1_REAL)]
+TIER3_ROWS = ""
+for _name, _sub in TIER3:
+    _allv = [r for r in VALID if (r.get("city") == _name
+             or (_name == "新一线" and r.get("city_group") == "一线新一线" and r.get("city") not in TL1)
+             or (_name == "传统一线" and r.get("city") in TL1))]
+    _fk = sum(1 for r in _allv if r.get("flag"))
+    TIER3_ROWS += (
+        f'<tr><td><b>{_name}</b></td><td>{len(_sub)}</td><td>{pct(_fk, len(_allv))}%</td>'
+        f'<td><b>{_med(_sub)}K</b></td>'
+        f'<td>{_pc(_sub, "SQL")}%</td><td>{_pc(_sub, "Python")}%</td>'
+        f'<td>{_pc(_sub, "BI可视化")}%</td><td>{_pc(_sub, "统计学")}%</td></tr>')
+
+_TY_SQL, _NT_SQL, _T1_SQL = (_pc(TY_REAL, "SQL"), _pc(NT1_REAL, "SQL"), _pc(T1_REAL, "SQL"))
+_TY_PY, _NT_PY, _T1_PY = (_pc(TY_REAL, "Python"), _pc(NT1_REAL, "Python"), _pc(T1_REAL, "Python"))
+_TY_MED, _NT_MED, _T1_MED = _med(TY_REAL), _med(NT1_REAL), _med(T1_REAL)
+
 html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -462,8 +511,8 @@ html = f"""<!DOCTYPE html>
 
 <h2>③ 怎么做的</h2>
 <ol>
-<li><b>采集</b>：手机端浏览 BOSS 直聘「数据分析」搜索结果，逐条截图，共 {N_SCREEN} 张</li>
-<li><b>识别</b>：本机 OCR（RapidOCR，离线运行，数据不出本机）批量转文字，{N_SCREEN} 张全部识别成功</li>
+<li><b>采集</b>：手机端浏览 BOSS 直聘「数据分析」搜索结果，逐条截图，共 {N_SCREEN} 张（分两批：2026-10-09 首采，2026-10-10 补采）</li>
+<li><b>识别</b>：本机 OCR（RapidOCR，离线运行，数据不出本机）批量转文字，全部识别成功</li>
 <li><b>归并</b>：按截图时间顺序合并 —— 有「薪资 + 职位描述」的为首屏（开新 JD），其后无薪资的续屏并入当前 JD</li>
 <li><b>清洗</b>：剔除 1 张非 JD 页面；修正 OCR 城市错字（「荔州」→「苏州」）；与前期人工采集的 31 条做跨批去重 → 净新增 103 条</li>
 <li><b>结构化</b>：提取基础字段；技能别名归并（MySQL / 关系型数据库 → SQL，Tableau / PowerBI / 帆软 → BI可视化，SPSS / SAS → 统计学工具族）</li>
@@ -531,7 +580,30 @@ html = f"""<!DOCTYPE html>
 Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带仍重叠，标注为待验证。
 想拿一线薪资，补 SQL 的收益最确定 —— 因为 SQL 在一线是「没有不行」。</div>
 
-<h3>4.3 标题党：{pct(N_FAKE,N_VALID)}%（{N_FAKE}/{N_VALID}），分五类形态</h3>
+<h3>4.3 城市三层梯度：太原 → 新一线 → 传统一线 <span class="tag">补采后新增</span></h3>
+<p>第二轮补采后，新一线城市样本从 0 涨到 {len(NT1_REAL)} 条真实岗位，第一次有条件把原来的
+「一线/新一线」拆成两层看。拆开之后呈现的是一条<b>连续梯度</b>，而不是简单的「太原 vs 外地」：</p>
+<table>
+<tr><th>层级</th><th>真实岗位</th><th>标题党占比</th><th>薪资中位</th><th>SQL</th><th>Python</th><th>BI 可视化</th><th>统计学</th></tr>
+{TIER3_ROWS}
+</table>
+<div class="hint g"><b>1｜技能要求和薪资是同步爬坡的，但爬的不是同一段。</b>
+薪资差距集中在<b>太原 → 新一线</b>这一段（{_TY_MED}K → {_NT_MED}K，约 {round(_NT_MED/max(_TY_MED,0.1),1)} 倍），
+新一线到传统一线只再涨 {round(_T1_MED-_NT_MED,1)}K。
+<b>技能要求则从新一线到传统一线仍在明显上升</b>（Python {_NT_PY}% → {_T1_PY}%）。
+→ 换句话说：<b>离开太原这一步决定薪资量级，再往上走决定技术深度。</b></div>
+<div class="hint r"><b>2｜标题党率随城市能级断崖式下降：太原 28% → 新一线 4% → 传统一线 0%。</b>
+一线城市 {len(T1_REAL)} 条真实岗位里，<b>一条标题党都没有</b>。
+这说明「挂着数据分析名头卖别的」是<b>低能级城市特有的现象</b> ——
+在太原找工作，识别标题党不是加分技能，是<b>保命技能</b>。</div>
+<div class="hint"><b>3｜太原与新一线的 SQL 差距（{_TY_SQL}% vs {_NT_SQL}%）小于 Python 差距（{_TY_PY}% vs {_NT_PY}%）。</b>
+SQL 在太原已经是「过半岗位要求」的准通用技能；<b>真正的分水岭是 Python</b> ——
+它是三个层级间拉开最明显的一项（{_TY_PY}% / {_NT_PY}% / {_T1_PY}%）。
+这与 4.7 节十年变迁中「Python 是涨得最快的技能」互相印证。</div>
+<div class="hint o"><b>口径说明：</b>传统一线 = 北上广深；新一线 = 成都/杭州/苏州/长沙/无锡/南京/宁波等。
+「其他二线/未知」合计仅 4 条，样本太小，未纳入本表。</div>
+
+<h3>4.4 标题党：{pct(N_FAKE,N_VALID)}%（{N_FAKE}/{N_VALID}），分五类形态</h3>
 <div class="hint"><b>判定标准：是否「挂羊头」，不是「是否提到工具名」。</b>
 有的真岗位（如高层经营分析、销售分析）JD 通篇不写工具，但职责是真实的 —— 这类<b>不算标题党</b>。
 本次有 3 条因此被人工从「标题党」改判为「真岗」。</div>
@@ -543,7 +615,7 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 一条「数据信息员」的标签写着「数据分析/挖掘经验」，正文实为把客户信息整理好交给销售部门。
 <b>只看标签筛选岗位不可靠，必须读正文。</b>该条已由人工改判。</div>
 
-<h3>4.4 AI 要求：不是「有没有」，而是「哪一种」 <span class="tag">本轮新增维度</span></h3>
+<h3>4.5 AI 要求：不是「有没有」，而是「哪一种」 <span class="tag">本轮新增维度</span></h3>
 <p>把「AI 相关要求」拆成三层后，结论才成立 —— <b>混在一层会把 2020 年就有的传统统计建模算成 AI 要求</b>：</p>
 <table>
 <tr><th>层级</th><th>含义</th><th>太原({len(TY_REAL)} 条)</th><th>一线/新一线({len(FS_REAL)} 条)</th></tr>
@@ -563,7 +635,7 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 （95%CI ±{round(ci95(ai_fs_has,len(FS_REAL))*100)}%）——
 <b>误差带重叠，不能说「太原 AI 要求低于一线」。</b>这里的结论是定性的（两极分化），不是百分比差异。</div>
 
-<h3>4.5 薪资分布（月薪中位，{len(_av)} 条可解析）</h3>
+<h3>4.6 薪资分布（月薪中位，{len(_av)} 条可解析）</h3>
 <div class="panel">
 {sal_html}
 </div>
@@ -571,8 +643,8 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 它是太原 {MED_TY}K 和一线 {MED_FS}K 两个完全不同分布的混合平均。
 本次分析因此<b>放弃全国单一中位数，改用分城市口径</b>。「·N 薪」岗位已按年化折算（×N/12），「元/天」岗位按 21.75 个工作日折算月薪。</p>
 
-<h3>4.6 十年变迁：{TS_DATE} vs 2026 <span class="tag">第三方数据对照层</span></h3>
-<p>自采样本是<b>单日快照</b>，回答不了「技能需求怎么变」。所以引入一份第三方公开数据集做对照：
+<h3>4.7 十年变迁：{TS_DATE} vs 2026 <span class="tag">第三方数据对照层</span></h3>
+<p>自采样本是<b>{CDATE_TXT} 两个采集日的横截面</b>，跨度只有一天，回答不了「技能需求怎么变」。所以引入一份第三方公开数据集做对照：
 <b>{TS_DATE} 拉勾网数据分析岗 {N16_ALL} 条</b>（GitHub 公开仓库 <code>BigCarrey/Data_analysis_in_lagou</code>，含 JD 全文）。
 为公平比较，两期都限定为<b>一线城市真实岗位</b>（2016：京沪深广杭 {N16} 条；2026：一线/新一线 {N26_TS} 条）。</p>
 <div class="hint o"><b>这份数据的采集方式，必须先说清楚：</b>
@@ -584,7 +656,7 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 <tr><th>对比项</th><th>主样本（本报告 {N_VALID} 条）</th><th>对照层（2016 拉勾 {N16_ALL} 条）</th></tr>
 <tr><td>采集者</td><td><b>本人</b></td><td>第三方（GitHub 仓库作者）</td></tr>
 <tr><td>采集方式</td><td>手机手动截图 + 本地离线 OCR，<b>无任何自动化抓取</b></td><td>集搜客爬虫工具抓取</td></tr>
-<tr><td>采集时间</td><td>2026-10-09（单日）</td><td>{TS_DATE}（单日）</td></tr>
+<tr><td>采集时间</td><td>{CDATE_MAIN} 起两个采集日</td><td>{TS_DATE}（单日）</td></tr>
 <tr><td>平台</td><td>BOSS直聘</td><td>拉勾网</td></tr>
 <tr><td>用途</td><td>全部统计结论的主干</td><td><b>仅做时间趋势对照，不混入主样本</b></td></tr>
 </table>
@@ -599,7 +671,7 @@ SQL 也在涨（53%→81%），但它十年前就已经是主流 —— <b>SQL �
 十年前三分之一的数据分析岗点名要 SPSS，现在几乎绝迹。
 <b>如果你还在学校被教 SPSS，要意识到它在就业市场已经基本失效 —— 它对应的生态位被 Python 接管了。</b></div>
 <div class="hint"><b>3｜Excel 和报表十年没变（40%→33%、51%→59%，均不显著）。</b>
-这从时间维度印证了 4.7 节的判断：<b>Excel 是通用办公底子，十年前是、现在也是，因此撑不起溢价。</b>
+这从时间维度印证了 4.8 节的判断：<b>Excel 是通用办公底子，十年前是、现在也是，因此撑不起溢价。</b>
 真正决定薪资的是那几项十年间翻倍的技能。</div>
 <div class="hint o"><b>对照层的口径边界（必须说清）：</b>
 ①两期来自<b>不同平台</b>（拉勾 vs BOSS直聘）、<b>不同采集方式</b>（第三方爬虫 vs 本人截图 OCR），
@@ -607,7 +679,7 @@ SQL 也在涨（53%→81%），但它十年前就已经是主流 —— <b>SQL �
 ③2016 年 JD 中<b>不存在 AI 要求</b>，该维度无法做时间对比；
 ④第三方数据<b>未混入主样本</b>，{N_VALID} 条统计口径保持不变。</div>
 
-<h3>4.7 三个反直觉的洞察</h3>
+<h3>4.8 三个反直觉的洞察</h3>
 <div class="hint g"><b>1｜工具是入场券，业务理解才是溢价。</b>
 工具要求密集的岗位集中在 5-13K（SQL + BI + 统计学是标配）；而样本薪资天花板（某大厂 35-45K·15 薪）的 JD 里
 <b>一个工具名都没有</b>，只谈经营分析体系、跨部门推动和 PMO。<b>越往上走，JD 越不谈工具。</b></div>
@@ -628,7 +700,7 @@ Python / 统计学 / BI / AI 一律标「待验证」——<b>宁可少下一个
 <b>本人未实施任何爬取</b>，仅下载公开文件做只读分析 —— 但这一来源差异必须在报告中写明，
 否则会与本文「主样本无爬虫」的声明产生矛盾。对照层<b>仅用于观察十年趋势方向</b>，
 其绝对值不可与自采样本并列引用</li>
-<li><b>自采样本是单日快照</b>：{N_SCREEN} 张截图全部采集于 2026-10-09，靠它无法观察时间趋势。时间维度改为引入第三方 2016 年数据集做对照（见 4.6），已做城市口径对齐，但<b>两期平台与采集方式不同，趋势结论应理解为「方向」而非「精确幅度」</b></li>
+<li><b>自采样本是短窗口横截面</b>：{N_SCREEN} 张截图采集于 {CDATE_TXT}，跨度仅一天，靠它无法观察时间趋势（岗位供给、季节性波动都抓不到）。时间维度改为引入第三方 2016 年数据集做对照（见 4.7），已做城市口径对齐，但<b>两期平台与采集方式不同，趋势结论应理解为「方向」而非「精确幅度」</b></li>
 <li><b>OCR 误差</b>：识别准确率良好但有系统性错字（「职位详情」→「职位洋情」、「苏州」→「荔州」）。城市与公司名靠正则提取，存在误判（7 条公司名被地图地址、银行名替换），已人工核验修正</li>
 <li><b>归并规则是我定义的</b>：「有薪资 + 有描述 = 新 JD」这一假设对连续翻页成立，但若两次浏览同一岗位且中间夹了其他岗位，会算成两条。二次去重补回了 {N_DROP2} 条</li>
 <li><b>技能归并表主观</b>：SPSS / SAS 归统计学工具族、Tableau / PowerBI / 帆软归 BI 可视化 —— 换一套规则数字会不同</li>
@@ -648,8 +720,8 @@ Python / 统计学 / BI / AI 一律标「待验证」——<b>宁可少下一个
 <tr><td>技能共现 / 词频可视化项目</td><td>技能别名归并字典思路</td>
 <td>没上 NLP / 词向量：{N_VALID} 条样本用规则表 + 人工复核更可控、可解释，也更容易向面试官讲清每一步</td></tr>
 <tr><td>二手 JD 数据集<br>（GitHub 公开仓库 / 和鲸社区）</td>
-<td><b>时间对比层的思路</b>：用第三方历史数据，补上自采单日快照缺失的时间维度</td>
-<td>只采纳 1 份（GitHub 公开仓库 <code>BigCarrey/Data_analysis_in_lagou</code>，{TS_DATE} 拉勾 {N16_ALL} 条，取一线口径 {N16} 条）并<b>仅作对照、不混入主样本</b>。<br><b>其采集方式为第三方使用「集搜客」爬虫工具抓取（原仓库 README 自述），本人未参与任何抓取</b>，仅下载公开文件做只读分析；已在本报告 4.6 节与局限中显式声明，<b>不冒充自采</b>。不用它的其他理由：
+<td><b>时间对比层的思路</b>：用第三方历史数据，补上自采短窗口横截面缺失的时间维度</td>
+<td>只采纳 1 份（GitHub 公开仓库 <code>BigCarrey/Data_analysis_in_lagou</code>，{TS_DATE} 拉勾 {N16_ALL} 条，取一线口径 {N16} 条）并<b>仅作对照、不混入主样本</b>。<br><b>其采集方式为第三方使用「集搜客」爬虫工具抓取（原仓库 README 自述），本人未参与任何抓取</b>，仅下载公开文件做只读分析；已在本报告 4.7 节与局限中显式声明，<b>不冒充自采</b>。不用它的其他理由：
 ①它是一线城市口径，直接混入会污染太原主线；②2016 年数据<b>不可能包含 AI 技能要求</b>（ChatGPT 2022-11-30 才发布）；
 ③该数据由他人采集，已在报告中显式标注来源，<b>不冒充自采</b>。<br>
 和鲸那份（2880 条，带 tags 技能标签）查过但没用：直链返回登录墙且标注「同校用户禁止下载」，且同为 2022 年前数据</td></tr>

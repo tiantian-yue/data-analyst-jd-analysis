@@ -38,7 +38,36 @@ DUPS = [
 DUP_DROP = {d[1] for d in DUPS}
 
 
+# OCR 城市名错字修正表
+# BOSS 页面城市字段经 OCR 后系统性错识，用「XX·YY区」地址线索反查确认：
+#   荔州 → 苏州（地址命中 姑荔区=姑苏区 / 虎丘区 / 吴中区 / 相城区 / 荔州工业园区）
+#   充锡 → 无锡（地址命中 锡山区 / 梁溪区 / 惠山区）
+#   深训 / 浑圳 → 深圳
+# 前缀粘连（"新荔州""程师充锡""析师荔州"）是岗位名被并进了城市字段
+CITY_FIX = {
+    "荔州": "苏州", "新荔州": "苏州", "析师荔州": "苏州", "大数据荔州": "苏州",
+    "充锡": "无锡", "新充锡": "无锡", "程师充锡": "无锡", "析师充锡": "无锡",
+    "专员充锡": "无锡", "数据分充锡": "无锡",
+    "深训": "深圳", "浑圳": "深圳", "新浑圳": "深圳",
+}
+CITY_FIX_SUFFIX = (("荔州", "苏州"), ("充锡", "无锡"), ("浑圳", "深圳"), ("深训", "深圳"))
+
+
+def fix_city(c):
+    """修正 OCR 错识的城市名；返回 None/空 则原样返回"""
+    if not c:
+        return c
+    c = c.strip()
+    if c in CITY_FIX:
+        return CITY_FIX[c]
+    for suf, real in CITY_FIX_SUFFIX:
+        if c.endswith(suf):
+            return real
+    return c
+
+
 def city_tier(city):
+    city = fix_city(city)
     if not city:
         return "未知"
     if city == "太原":
@@ -52,7 +81,7 @@ def city_tier(city):
 
 def city_group(city):
     """三级分组：太原 / 一线新一线 / 其他二线"""
-    t = city_tier(city)
+    t = city_tier(fix_city(city))
     if t == "太原":
         return "太原"
     if t in ("一线", "新一线"):
@@ -202,10 +231,22 @@ def main():
         wel = hit(desc, WELFARE)
         outsrc = hit(desc, OUTSOURCE)
 
+        # 采集日期：从截图文件名推断（Screenshot_20261010_xxx → 2026-10-10），
+        # 推断不出才回落到 2026-10-09。跨批次采集后不能再写死单日。
+        cdate = r.get("collect_date") or ""
+        if not cdate:
+            _m = re.search(r"(20\d{6})", "|".join(r.get("files", []) or []))
+            if _m:
+                s8 = _m.group(1)
+                cdate = "%s-%s-%s" % (s8[:4], s8[4:6], s8[6:])
+            else:
+                cdate = "2026-10-09"
+
         stub = {
             **r,
             "dup_of": "" if r["id"] not in DUP_DROP else next(k for k, v, _ in DUPS if v == r["id"]),
             "is_valid": 0 if r["id"] in DUP_DROP else 1,
+            "city": fix_city(r.get("city", "")),
             "city_group": grp,
             "city_tier": city_tier(city),
             "direction": direction,
@@ -221,7 +262,7 @@ def main():
             "welfare": "|".join(wel[:5]),
             "outsourced": 1 if outsrc else 0,
             "outsourced_kw": "|".join(outsrc[:2]),
-            "collect_date": r.get("collect_date", "2026-10-09"),
+            "collect_date": cdate,
             "applied": r.get("applied", ""),      # ③ 投递：留给后续填写
             "got_reply": r.get("got_reply", ""),  # ③ 结果：留给后续填写
         }

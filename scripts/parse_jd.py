@@ -113,17 +113,49 @@ SALES_SIGNALS = ["无需销售", "无需开发客户", "开发客户", "客户�
                  "上不封顶", "电话销售", "客服", "接听", "推广"]
 
 
+# 「挂羊头」的强信号：出现这些词，基本可断定不是数据分析岗
+FAKE_STRONG = ["标注", "打标", "拉框", "训练数据", "数据生产", "图片标注", "标品",
+               "比价", "录入员", "无考核", "明日上岗", "今天面试", "即日上岗",
+               "无需销售", "无需开发客户", "上不封顶", "电话销售", "接听",
+               "打字快", "会用电脑"]
+# 「真岗位」的强信号：有明确的岗位职责/任职要求结构，且正文够长
+REAL_STRUCT = ["岗位职责", "工作职责", "任职要求", "任职资格", "岗位要求", "职位描述",
+               "职位详情", "职位洋情",      # 「职位详情」被 OCR 系统性错识成「职位洋情」
+               "工作内容", "岗位职责："]
+
+
 def is_title_only(full_text, skills):
-    """判断是否为『标题党』：标题有『数据分析』，但正文无技术技能。
-    返回 (bool, 命中理由)"""
+    """判断是否为『标题党』。
+    判定标准不是「正文有没有写工具名」，而是「是不是挂羊头卖狗肉」。
+    返回 (bool, 命中理由)
+
+    为什么不能只看工具名（第二轮踩过的坑，批量处理时又踩了一次）：
+    腾讯《王者荣耀》15-30K 游戏数据分析、淘宝闪购 15-25K 数据分析专家、
+    MOVA 12-24K 电商数据分析师这类岗位，JD 正文常常只写业务职责、
+    不写 SQL/Python 等工具名；若按「无工具名 = 标题党」判，会把最优质的
+    岗位整批误杀，并系统性拉低技能占比、抬高标题党率。
+    """
     has_tech = any(s in TECH_SKILLS for s in skills)
-    hit_sales = [w for w in SALES_SIGNALS if w in full_text]
-    if not has_tech:
-        reason = "正文无任何技术技能"
-        if hit_sales:
-            reason += "；含销售话术：" + "/".join(hit_sales[:3])
-        return True, reason
-    return False, ""
+    if has_tech:
+        return False, ""
+
+    txt = full_text or ""
+    # ① 有「挂羊头」强信号 → 标题党
+    hit_fake = [w for w in FAKE_STRONG if w in txt]
+    if hit_fake:
+        return True, "非数据岗实质内容：" + "/".join(hit_fake[:3])
+
+    # ② 有完整岗位职责结构 且 正文够长 → 判定为真岗位（只是没写工具名）
+    has_struct = any(w in txt for w in REAL_STRUCT)
+    if has_struct and len(txt) >= 250:
+        return False, ""
+
+    # ③ 其余：正文空洞且无工具名 → 标题党
+    hit_sales = [w for w in SALES_SIGNALS if w in txt]
+    reason = "正文无任何技术技能"
+    if hit_sales:
+        reason += "；含销售话术：" + "/".join(hit_sales[:3])
+    return True, reason
 
 
 def block_to_record(block):
