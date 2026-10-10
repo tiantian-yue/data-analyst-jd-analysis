@@ -1,0 +1,11 @@
+维度	有效条数	覆盖率	说明
+city_group	134	100.0%	地区三级分组
+direction	134	100.0%	①岗位方向细分
+fresh_ok	84	62.7%	②可否应届 2明确可/1可能/0需经验(-1未知)
+ai_level	134	100.0%	④AI要求 3研发/2应用/1传统ML/0无
+company_size	80	59.7%	⑤公司规模
+company_financing	51	38.1%	⑤融资阶段
+rest_double_off	3	2.2%	⑦双休 1是/0否(-1未提及)
+insurance	7	5.2%	⑧社保
+welfare	8	6.0%	⑧福利
+outsourced	134	100.0%	⑧是否外包

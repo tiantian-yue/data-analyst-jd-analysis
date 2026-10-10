@@ -1,0 +1,19 @@
+# 原始截图（含个人账号信息与页面噪音，98MB，不入库）
+data/screenshots/
+data/ocr_text/
+
+# 中间产物（各批次解析结果，仅过程留痕）
+data/intermediate/
+
+# 历史版本与废弃方案（仅本地留痕，不对外展示）
+archive/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 系统
+.DS_Store
+Thumbs.db
