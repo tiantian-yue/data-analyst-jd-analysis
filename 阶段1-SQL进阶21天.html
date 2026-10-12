@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>阶段一 · SQL 进阶 21 天执行表</title>
+<style>
+:root{--blue:#1a5fd6;--ink:#1a1d23;--ink2:#4a5160;--ink3:#8b93a1;--line:#e5e8ee;
+ --grn:#0e8a4a;--grnbg:#e9f7f0;--org:#c2680a;--orgbg:#fdf3e6;--red:#c0392b;--redbg:#fdecea;--bg:#f7f8fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.85 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:40px 24px 80px}
+.hero{background:linear-gradient(135deg,#1a5fd6,#2b7ae0);border-radius:16px;padding:32px;color:#fff;margin-bottom:26px}
+.hero h1{margin:0 0 10px;font-size:25px;font-weight:700;line-height:1.4}
+.hero p{margin:0;font-size:14px;opacity:.93;line-height:1.7}
+h2{font-size:19px;margin:38px 0 12px;padding-left:12px;border-left:4px solid var(--blue)}
+h3{font-size:16px;margin:22px 0 8px}
+p{color:var(--ink2)}
+code{background:#f2f4f8;padding:1px 6px;border-radius:4px;font-size:12.5px;color:#b5286b;
+ font-family:ui-monospace,Consolas,monospace}
+pre{background:#1e2229;color:#e6e9ef;border-radius:10px;padding:14px 16px;overflow-x:auto;
+ font:12.5px/1.7 ui-monospace,Consolas,monospace;margin:10px 0}
+pre .c{color:#7d8799}
+.hint{border-left:4px solid var(--blue);border-radius:8px;padding:13px 17px;font-size:13.5px;color:var(--ink2);margin:14px 0;background:#eef4ff}
+.hint.g{background:var(--grnbg);border-color:var(--grn)}
+.hint.o{background:var(--orgbg);border-color:var(--org)}
+.hint.r{background:var(--redbg);border-color:var(--red)}
+.hint b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+ border-radius:10px;overflow:hidden;font-size:13.5px;margin:12px 0}
+th{background:#f2f5fa;text-align:left;padding:10px 12px;font-size:12.5px;color:var(--ink2);border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid #f0f2f6;color:var(--ink2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.week{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0}
+.week .wh{background:#f2f5fa;padding:13px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.week .wh .t{font-size:15px;font-weight:700;color:var(--ink)}
+.week .wh .w{font-size:12.5px;color:var(--ink3)}
+.week .wb{padding:6px 20px 16px}
+.day{border-bottom:1px dashed var(--line);padding:12px 0}
+.day:last-child{border-bottom:none}
+.day .dh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.day .dn{font-size:12px;font-weight:800;color:#fff;background:var(--blue);border-radius:5px;padding:1px 8px;flex-shrink:0}
+.day .dt{font-size:14px;font-weight:700;color:var(--ink)}
+.day .dm{font-size:12.5px;color:var(--ink3);margin-left:auto}
+.day ul{margin:8px 0 0;padding-left:22px}
+.day li{font-size:13.5px;color:var(--ink2);margin:4px 0}
+details{margin:10px 0;background:#fbfcfe;border:1px solid var(--line);border-radius:9px;padding:0}
+details summary{cursor:pointer;padding:10px 16px;font-size:13px;font-weight:600;color:var(--blue);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▶ ";font-size:10px}
+details[open] summary::before{content:"▼ "}
+details .dbody{padding:0 16px 14px;border-top:1px solid var(--line);margin-top:2px}
+.pill{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;background:var(--grnbg);color:var(--grn)}
+.pill.o{background:var(--orgbg);color:var(--org)}
+.pill.r{background:var(--redbg);color:var(--red)}
+.chk{list-style:none;padding:0;margin:8px 0}
+.chk li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink2);margin:8px 0}
+.chk input{margin-top:5px;width:15px;height:15px;flex-shrink:0;accent-color:var(--blue)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:14px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.card .num{font-size:23px;font-weight:800;color:var(--blue)}
+.card .cap{font-size:12px;color:var(--ink3)}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+@media(max-width:680px){table{font-size:12px}th,td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+<h1>阶段一 · SQL 进阶：21 天执行表</h1>
+<p>目标只有一句：<b>不看资料，20 分钟内写出「近 7 日新用户次日留存率」，并能解释每个数字怎么来的。</b><br>
+每天 90 分钟 · 每周 5 天 · 共 15 个练习日（留 6 天缓冲，缺一天不补，顺延即可）<br>
+所有 SQL 均已在<b>本机 MySQL 8.0.46 / sqlpractice</b> 实测通过（2026-10-11）—— 答案是真跑出来的，不是眼熟的</p>
+</div>
+
+<h2>⓪ 今晚先做一件事（20 分钟）</h2>
+<div class="hint r">
+<b>现有 4 张表（8 个学生 / 12 条成绩）练不了留存、漏斗、环比。</b>
+这三件事需要「用户 × 日期 × 行为」这种日志型数据。我已经给你造好了，并且把坑埋进去了。
+</div>
+<p>双击桌面 <code>SQL练习.cmd</code>，进去后执行（把路径换成你自己的）：</p>
+<pre><span class="c">-- 新表已建好，确认一下有没有数据：</span>
+SELECT COUNT(*) FROM users;    <span class="c">-- 24</span>
+SELECT COUNT(*) FROM events;   <span class="c">-- 440</span></pre>
+<p>源文件在 <code>F:/allstudy/obsidian/sql/sql/附-练习库/MySQL行为日志表.sql</code>，
+可反复重跑（只 DROP 这两张表，不动你原来的 4 张）。
+<b>注意：</b>如果以后重跑了 <code>MySQL建库脚本.sql</code>（它会 DROP 整个库），记得再跑一次这个文件。</p>
+
+<h3>先看懂数据，再做题</h3>
+<table>
+<tr><th>用户</th><th>注册日</th><th>活跃规律</th><th>次日留存</th></tr>
+<tr><td>1–6 号</td><td>09-01 ~ 09-06</td><td>高留存组，注册后几乎天天来（每人各有 2 天不来）</td><td>1（留下来了）</td></tr>
+<tr><td>7–12 号</td><td>09-07 ~ 09-12</td><td>只来一天，注册当天活跃一次就消失</td><td>0</td></tr>
+<tr><td>13–18 号</td><td>09-13 ~ 09-18</td><td>注册当天 + 次日必来，之后断断续续</td><td>1</td></tr>
+<tr><td>19–24 号</td><td>09-19 ~ 09-24</td><td><b>僵尸号：注册后一次都没活跃</b></td><td>不存在（不在分母里）</td></tr>
+</table>
+<div class="hint o">
+<b>三个故意埋的坑，做题时一定会撞上：</b><br>
+<b>①</b> 1 号在 09-05 有两条 <code>visit</code> —— 不去重就会把同一个人算两遍。<br>
+<b>②</b> 2 号在 09-06 有 <code>cart</code>（加购）却没有 <code>view</code>（浏览）—— 漏斗乱序，逼你想「要不要校验层级顺序」。<br>
+<b>③</b> <b>09-12、09-13 两天一行数据都没有</b>（埋点故障）—— <code>LAG()</code> 会直接跳过这两天，
+你用 LAG 算出来的「昨天」其实是 09-11。这是面试高频坑，第 3 周专门治它。
+</div>
+
+<h2>① 每天 90 分钟怎么花</h2>
+<div class="cards">
+<div class="card"><div class="num">15′</div><div class="cap">复述昨天的题（不看笔记）</div></div>
+<div class="card"><div class="num">60′</div><div class="cap">写今天的题（必须真跑通）</div></div>
+<div class="card"><div class="num">15′</div><div class="cap">把结果贴进 Obsidian 笔记③</div></div>
+</div>
+<div class="hint">
+<b>两条硬规矩（跟你自己定的规范一致）：</b><br>
+1. <b>看懂 ≠ 会写。</b>每道题必须在 MySQL 里跑出结果，才允许贴进笔记。<br>
+2. <b>卡住时只看 [[SQL速查卡]]，不看参考答案。</b>答案区默认折叠，卡 20 分钟以上再展开 —— 展开不算失败，但要在错题本记一条。
+</div>
+
+<h2>② 第 1 周 · 窗口函数（3 篇笔记转绿）</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：三个排名函数的区别 / 每组 TopN / LAG-LEAD / 累计与移动窗口</span><span class="w">第 1–5 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D1</span><span class="dt">三个排名函数到底差在哪</span><span class="dm">employee 表 · 60′</span></div>
+<ul>
+<li>写一条 SQL，同时输出 <code>ROW_NUMBER / RANK / DENSE_RANK</code> 三列，按部门分组、薪资降序</li>
+<li>盯着技术部李四和王五（都是 18000），口述三列的差别：<b>行号 / 并列跳号 / 并列不跳号</b></li>
+<li>想清楚一件事：如果领导要「每个部门薪资<b>第二高</b>的那个人」，<b>用哪个函数？</b>（先记下你的答案，D2 会打脸 —— 技术部李四和王五并列 18000）</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>SELECT name, dept, salary,
+       ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) rn,
+       RANK()       OVER (PARTITION BY dept ORDER BY salary DESC) rk,
+       DENSE_RANK() OVER (PARTITION BY dept ORDER BY salary DESC) dr
+FROM employee ORDER BY dept, rn;</pre>
+<pre>张三 技术 20000  rn=1 rk=1 dr=1
+李四 技术 18000  rn=2 rk=2 dr=2
+王五 技术 18000  rn=3 rk=2 dr=2   &lt;-- 关键行
+赵六 销售 15000  rn=1 rk=1 dr=1
+钱七 销售 12000  rn=2 rk=2 dr=2</pre>
+<p>李四和王五并列 18000：<code>ROW_NUMBER</code> 硬给 2 和 3（并列也被拆开）；<code>RANK</code> 都给 2，下一个直接跳到 4；<code>DENSE_RANK</code> 都给 2，下一个还是 3。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D2</span><span class="dt">每组取 Top1 —— D1 的答案在这里被推翻</span><span class="dm">score + employee 表 · 60′</span></div>
+<ul>
+<li>查「每门课的最高分是谁」：<code>ROW_NUMBER() = 1</code> 包一层外层查询</li>
+<li>再查「每个部门薪资<b>第二高</b>的人」—— 技术部李四和王五并列 18000，你用 <code>rn = 2</code> 只会出李四，<b>王五被丢掉了</b>。改用 <code>rk = 2</code> 再试，两个人都会出来</li>
+<li>把结论写进笔记：<b>要「只取一条」用 ROW_NUMBER，要「并列全保留」用 RANK。需求不同，函数不同。</b></li>
+<li>顺带把 <code>03-聚合与分组/每组取最大值.md</code> 也过一遍——它有不用窗口函数的写法，对比一下哪种更好读</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>SELECT * FROM (
+  SELECT cname, sid, grade,
+         ROW_NUMBER() OVER (PARTITION BY cname ORDER BY grade DESC) rn
+  FROM score
+) t WHERE rn = 1;</pre>
+<pre>SQL实践  1号  92
+数据库   4号  95</pre>
+<pre><span class="c">-- 换成「每个部门薪资第二高的人」，差别立刻显形：</span>
+WHERE rn = 2  →  技术部只出李四（18000），王五被丢掉
+WHERE rk = 2  →  技术部出李四 + 王五（两人并列 18000）  &lt;-- 这个才是对的</pre>
+<p>王五和李四薪资完全相同，凭什么留一个丢一个？<b>需求说「第二高的人」时，并列必须都算。</b>
+但反过来，如果需求是「给每个部门第二高的人发一份奖金（一人一份）」，那就必须用 <code>ROW_NUMBER</code> 只挑一个 ——
+<b>需求不同，函数不同，没有哪个更好。</b></p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D3</span><span class="dt">LAG / LEAD 算日活环比，撞上断档坑</span><span class="dm">events 表 · 60′</span></div>
+<ul>
+<li>先按天聚合日活：<code>SELECT event_date, COUNT(DISTINCT user_id) FROM events GROUP BY event_date</code></li>
+<li>用 <code>LAG</code> 加一列「昨日 UV」和一列「环比差」</li>
+<li><b>再加一列</b>：<code>DATEDIFF(event_date, LAG(event_date) OVER (ORDER BY event_date))</code> —— 看看哪一天不是 1</li>
+<li>你会发现 09-14 那行这个值是 <b>3</b>。说明「昨日 UV」那一列在 09-14 其实是 09-11 的数。<b>先记住这个现象，别修，第 3 周修。</b></li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>WITH dau AS (
+  SELECT event_date, COUNT(DISTINCT user_id) uv FROM events GROUP BY event_date
+)
+SELECT event_date, uv,
+       LAG(uv) OVER (ORDER BY event_date) AS 昨日,
+       uv - LAG(uv) OVER (ORDER BY event_date) AS 环比差,
+       DATEDIFF(event_date, LAG(event_date) OVER (ORDER BY event_date)) AS 与上行的天数差
+FROM dau ORDER BY event_date;</pre>
+<pre>09-10  6   5   +1   1
+09-11  6   6    0   1
+09-14  7   6   +1   3   &lt;-- 断档：09-12、09-13 没有数据
+09-15  8   7   +1   1</pre>
+<p><code>LAG</code> 取的是「上一行」，不是「昨天」。数据缺行时它照样返回上一行的值，环比就这么算错了。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D4</span><span class="dt">累计求和与移动平均</span><span class="dm">events + employee 表 · 60′</span></div>
+<ul>
+<li>日活表上加两列：<b>累计 UV</b>（<code>SUM() OVER (ORDER BY ...)</code>）和 <b>7 日移动平均</b>（<code>ROWS BETWEEN 6 PRECEDING AND CURRENT ROW</code>）</li>
+<li>拿 employee 表做组内累计，你会看到一个怪事：技术部李四和王五的「累计」<b>都是 56000</b>，不是逐行增加 —— 想明白为什么（提示：并列值时默认按 <code>RANGE</code> 一次算完）</li>
+<li>想逐行累加怎么办？<code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code></li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre><span class="c">-- 7 日移动平均（日活表）</span>
+WITH dau AS (SELECT event_date, COUNT(DISTINCT user_id) uv FROM events GROUP BY event_date)
+SELECT event_date, uv,
+       ROUND(AVG(uv) OVER (ORDER BY event_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS 近7日均
+FROM dau ORDER BY event_date;</pre>
+<pre><span class="c">-- employee 组内累计：并列值的两种写法</span>
+SELECT name, salary,
+       SUM(salary) OVER (PARTITION BY dept ORDER BY salary DESC) AS 默认写法,
+       SUM(salary) OVER (PARTITION BY dept ORDER BY salary DESC
+                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS 逐行写法
+FROM employee WHERE dept='技术';</pre>
+<pre>张三 20000  20000  20000
+李四 18000  56000  38000
+王五 18000  56000  56000   &lt;-- 默认写法把并列的两个一起加完</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D5</span><span class="dt">复盘日 · 3 篇笔记转 🟢</span><span class="dm">45′</span></div>
+<ul>
+<li>不看书，把这周的四件事口述一遍：三个排名函数差别 / Top1 两种取法 / LAG 的断档坑 / RANGE 与 ROWS 的区别</li>
+<li>把 3 篇笔记状态从 🟡 改 🟢：<code>04-窗口函数/窗口函数与OVER.md</code>、<code>三个排名函数.md</code>、<code>累计与移动窗口.md</code></li>
+<li>错题本补：这周写错过的每条 SQL，按「快速归因表」格式记（病因分类，不抄题）</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>③ 第 2 周 · CTE 与自连接（2 篇笔记转绿）</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：WITH 拆解嵌套 / 自连接算留存 / LEFT JOIN 找没出现的 / 漏斗</span><span class="w">第 6–10 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D6</span><span class="dt">用 WITH 把嵌套查询拆平</span><span class="dm">events 表 · 60′</span></div>
+<ul>
+<li>先写<b>不用 CTE</b> 的版本：子查询里套子查询，算「日活高于月均的天数」</li>
+<li>再用 <code>WITH dau AS (...), avg_dau AS (...)</code> 重写一遍，对比可读性</li>
+<li>结论写进 <code>05-子查询与CTE/CTE与WITH.md</code>：<b>CTE 不改变性能，改变的是「三个月后你还看得懂吗」</b></li>
+<li>顺手试一次 MySQL 8 的递归 CTE（<code>WITH RECURSIVE</code>）造一个 1~10 的数列，第 3 周要用</li>
+</ul>
+<details><summary>参考答案</summary><div class="dbody">
+<pre>WITH dau AS (
+  SELECT event_date, COUNT(DISTINCT user_id) uv FROM events GROUP BY event_date
+), avg_dau AS (
+  SELECT AVG(uv) m FROM dau
+)
+SELECT d.event_date, d.uv, ROUND(a.m,2) 月均
+FROM dau d CROSS JOIN avg_dau a
+WHERE d.uv > a.m ORDER BY d.event_date;</pre>
+<pre><span class="c">-- 递归 CTE 预热（第 3 周造日期维表要用）</span>
+WITH RECURSIVE seq AS (
+  SELECT 1 n UNION ALL SELECT n+1 FROM seq WHERE n &lt; 10
+) SELECT * FROM seq;</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D7</span><span class="dt">自连接算次日留存（本周核心题）</span><span class="dm">users + events · 75′</span></div>
+<ul>
+<li>用 <code>users JOIN events</code> 找「注册当天活跃过的人」，再 <code>LEFT JOIN events</code> 找「第二天也来了的人」</li>
+<li>连接条件怎么写？<code>a.event_date = u.reg_date + INTERVAL 1 DAY</code> —— 日期加减是这题的命门</li>
+<li>算出次日留存率，然后<b>回头手算校验</b>：1–6 号和 13–18 号应该留下，7–12 号不该留下</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>SELECT COUNT(DISTINCT u.user_id) AS 当日活跃,
+       COUNT(DISTINCT a.user_id) AS 次日回访,
+       ROUND(100*COUNT(DISTINCT a.user_id)/COUNT(DISTINCT u.user_id),1) AS 次日留存率
+FROM users u
+JOIN events e ON e.user_id = u.user_id AND e.event_date = u.reg_date
+LEFT JOIN events a ON a.user_id = u.user_id
+                  AND a.event_date = u.reg_date + INTERVAL 1 DAY;</pre>
+<pre>当日活跃 16 | 次日回访 11 | 68.8</pre>
+<p><b>注意：</b>换一种口径结果就变了 —— 按「首次活跃日」算是 <b>17 / 11 / 64.7%</b>。
+差异来自 12 号和 13 号：他们撞上了 09-12、09-13 的埋点故障，注册当天根本没有数据，
+<b>按注册日算会被直接踢出分母（分母 18→16），按首次活跃日算则会被记成「09-14 才首次活跃」</b>。
+两种口径都能用，但简历和面试时必须说清你用的是哪一种 —— 说不清口径，等于没做。
+顺手把 02-多表JOIN 里的 <code>ON与WHERE的区别.md</code> 翻出来看：把留存条件写进 WHERE 会怎样？（LEFT JOIN 退化成 INNER JOIN，僵尸号消失）</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D8</span><span class="dt">找「从来没出现过的人」+ NOT IN 的 NULL 坑</span><span class="dm">users + events + course · 60′</span></div>
+<ul>
+<li>查<b>僵尸号</b>：注册后一条行为都没有的用户（答案应该是 19–24 号，6 个人）</li>
+<li>分别用 <code>LEFT JOIN ... IS NULL</code> 和 <code>NOT IN (子查询)</code> 两种写法，<b>对比结果是否一致</b></li>
+<li>再用 <code>course</code> 表练一次「哪些课没人考」（答案是 <code>Python基础</code>）—— 回忆为什么 <code>NOT IN</code> 遇到 NULL 会返回空集</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>SELECT u.user_id, u.reg_date
+FROM users u LEFT JOIN events e ON e.user_id = u.user_id
+WHERE e.user_id IS NULL ORDER BY u.user_id;</pre>
+<pre>19 号 09-19 / 20 号 09-20 / 21 号 09-21 / 22 号 09-22 / 23 号 09-23 / 24 号 09-24</pre>
+<p>6 个僵尸号。用 <code>NOT IN</code> 也能得到同样结果——<b>但前提是子查询里的 <code>user_id</code> 没有 NULL</b>。
+只要子查询返回的结果集里含一个 NULL，<code>NOT IN</code> 就会整体返回空。这是 <code>LEFT JOIN IS NULL</code> 更稳的原因。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D9</span><span class="dt">漏斗转化 + 撞上乱序坑</span><span class="dm">events 表 · 60′</span></div>
+<ul>
+<li>算四层漏斗 UV：<code>visit → view → cart → pay</code>（<b>先按 user_id 去重</b>，否则 1 号那条重复的 visit 会污染结果）</li>
+<li>输出每层的转化率和整体支付率</li>
+<li>然后处理坑②：2 号有 <code>cart</code> 却没有 <code>view</code>。<b>业务上这不合理，你的漏斗要怎么处理它？</b>
+两种思路都写一版：<b>宽松版</b>（不校验顺序，各层独立计数）和 <b>严格版</b>（必须前一层的日期 ≤ 后一层才计入）</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre><span class="c">-- 宽松版（各层独立去重计数）</span>
+SELECT SUM(event_type='visit') 访问, SUM(event_type='view') 浏览,
+       SUM(event_type='cart')  加购, SUM(event_type='pay')   支付,
+       ROUND(100*SUM(event_type='pay')/SUM(event_type='visit'),1) 整体支付率
+FROM (SELECT DISTINCT user_id, event_type FROM events) t;</pre>
+<pre>访问 17 | 浏览 15 | 加购 8 | 支付 3 | 整体支付率 17.6</pre>
+<p>严格版要先按 user 取出「首次 view 日期」和「首次 cart 日期」，再要求 <code>cart日期 &gt;= view日期</code> 才计入——
+2 号会被剔除。真实业务里两种口径都会遇到，<b>关键是你要能说清自己用的是哪种</b>。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D10</span><span class="dt">复盘日 · 2 篇笔记转 🟢</span><span class="dm">45′</span></div>
+<ul>
+<li>口述：CTE 解决了什么问题 / 自连接算留存的三种写法 / 为什么 NOT IN 怕 NULL / 漏斗两种口径差别</li>
+<li>转 🟢：<code>05-子查询与CTE/CTE与WITH.md</code>、<code>02-多表JOIN/自连接与多表JOIN.md</code></li>
+<li>错题本补归因</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>④ 第 3 周 · 三条业务模板 + 验收</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：把前面散的题固化成三套能直接搬进简历的模板</span><span class="w">第 11–15 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D11</span><span class="dt">模板一：留存（一次输出次日 / 7 日 / 30 日）</span><span class="dm">events · 75′</span></div>
+<ul>
+<li>关键点：<b>先把 events 去重成「用户 × 日期」</b>（<code>SELECT DISTINCT</code>），后面全部基于它算</li>
+<li>取每个用户的首次活跃日，然后 LEFT JOIN 三次（+1 天 / +7 天 / +30 天），用 <code>COUNT(DISTINCT CASE WHEN ...)</code> 一次算完三列</li>
+<li>再按注册渠道分组看留存差异 —— 这一步做完，它就能写进简历了</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>WITH act AS (SELECT DISTINCT user_id, event_date FROM events),
+fd AS (SELECT user_id, MIN(event_date) fd FROM act GROUP BY user_id)
+SELECT COUNT(DISTINCT f.user_id) 首日活跃,
+       COUNT(DISTINCT CASE WHEN a1.user_id IS NOT NULL THEN f.user_id END) 次日,
+       COUNT(DISTINCT CASE WHEN a7.user_id IS NOT NULL THEN f.user_id END) 七日,
+       ROUND(100*COUNT(DISTINCT a1.user_id)/COUNT(DISTINCT f.user_id),1) 次日留存率
+FROM fd f
+LEFT JOIN act a1 ON a1.user_id=f.user_id AND a1.event_date=f.fd+INTERVAL 1 DAY
+LEFT JOIN act a7 ON a7.user_id=f.user_id AND a7.event_date=f.fd+INTERVAL 7 DAY;</pre>
+<pre>首日活跃 17 | 次日 11 | 七日 4 | 次日留存率 64.7</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D12</span><span class="dt">模板二：环比 —— 把 D3 的断档坑修掉</span><span class="dm">events · 75′</span></div>
+<ul>
+<li>用 <code>WITH RECURSIVE</code> 造一张 09-01 ~ 09-30 的<b>连续日期表</b></li>
+<li>LEFT JOIN 日活表，缺失的日期补 <code>COALESCE(uv, 0)</code></li>
+<li>现在再算 LAG 环比 —— 09-12、09-13 会出现 uv=0，环比是 −7 和 +7，这才是真实情况</li>
+<li><b>这一步是本周最大收获：</b>日期维表是环比/留存类需求的标准前置动作，很多应届生不会</li>
+</ul>
+<details><summary>参考答案</summary><div class="dbody">
+<pre>WITH RECURSIVE cal AS (
+  SELECT DATE('2026-09-01') d
+  UNION ALL
+  SELECT d + INTERVAL 1 DAY FROM cal WHERE d &lt; '2026-09-30'
+),
+dau AS (SELECT event_date, COUNT(DISTINCT user_id) uv FROM events GROUP BY event_date)
+SELECT cal.d, COALESCE(dau.uv,0) uv,
+       COALESCE(dau.uv,0) - LAG(COALESCE(dau.uv,0)) OVER (ORDER BY cal.d) 环比差
+FROM cal LEFT JOIN dau ON dau.event_date = cal.d
+ORDER BY cal.d;</pre>
+<pre>09-11  6   0
+09-12  0  -6   &lt;-- 补出来了：这天 uv=0，不是"平稳"
+09-13  0   0
+09-14  7  +7</pre>
+<p>不做这一步，09-14 会被算成「比 09-11 涨了 1」，看上去平稳；
+补上日期维表才知道中间两天是 <b>数据丢了</b>。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D13</span><span class="dt">模板三：漏斗 + 行列转换</span><span class="dm">events + users · 75′</span></div>
+<ul>
+<li>做一张<b>渠道 × 事件层级</b>的透视表：<code>COUNT(DISTINCT CASE WHEN event_type='pay' THEN user_id END)</code></li>
+<li>这就是最朴素的<b>行列转换</b>：把「事件类型」这一列的值，拍平成多个列</li>
+<li>再按渠道算支付转化率，找出哪个渠道质量最好</li>
+</ul>
+<details><summary>参考答案 + 实测结果</summary><div class="dbody">
+<pre>SELECT u.channel,
+       COUNT(DISTINCT CASE WHEN e.event_type='visit' THEN e.user_id END) 访问,
+       COUNT(DISTINCT CASE WHEN e.event_type='pay'   THEN e.user_id END) 支付
+FROM users u LEFT JOIN events e ON e.user_id = u.user_id
+GROUP BY u.channel;</pre>
+<pre>投放   访问 6  支付 1
+老带新 访问 6  支付 2
+自然   访问 5  支付 0   &lt;-- 自然流量看起来免费，实际一个都没转化</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D14</span><span class="dt">计时验收（今天不许看任何资料）</span><span class="dm">30′</span></div>
+<ul>
+<li>开计时器，<b>20 分钟</b>，题目只有一道：<code>近 7 日新用户的次日留存率，按注册渠道分组输出</code></li>
+<li>规则：可以查 MySQL 语法手册，<b>不可以翻自己的笔记和本文档</b></li>
+<li>跑出结果后，用一句话向「不懂 SQL 的人」解释这个数字是怎么算出来的</li>
+<li>超时或写不出来 —— 明天重做一遍，不跳过</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D15</span><span class="dt">收尾：写成能贴进简历的一句话</span><span class="dm">45′</span></div>
+<ul>
+<li>把 D11 的留存 SQL 整理干净（加注释、统一别名），存进 <code>附-练习库/</code></li>
+<li>写一句简历话术，<b>必须带口径</b>。示例：
+「基于 24 用户 / 440 条行为日志自建数据集，用 SQL 完成次日 / 7 日 / 30 日留存与四层漏斗转化分析，
+处理了埋点缺失导致的日期断档（补日期维表）与重复上报问题」</li>
+<li>新建 <code>04-窗口函数/留存与漏斗模板.md</code>（一篇新笔记，第 6 篇 🟢 目标）</li>
+<li>把「作品集 #2」那条 JD 分析项目链接，和这份 SQL 练习放在同一个作品集目录里 —— 互相印证</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>⑤ 验收表</h2>
+<div class="week"><div class="wb" style="padding-top:14px">
+<ul class="chk">
+<li><input type="checkbox"><b>D14 计时通过</b>：不看笔记，20 分钟内写出「近 7 日新用户次日留存率（按渠道分组）」并跑出数</li>
+<li><input type="checkbox"><b>能口述</b>：三个排名函数的区别（并列时行号怎么跳）</li>
+<li><input type="checkbox"><b>能口述</b>：Top1 用 ROW_NUMBER 还是 RANK —— 由「要不要保留并列」决定</li>
+<li><input type="checkbox"><b>能口述</b>：LAG 取的是上一行不是昨天，缺数据时怎么补（日期维表）</li>
+<li><input type="checkbox"><b>能口述</b>：留存分母的两种口径（按注册日 / 按首次活跃日），差异来自哪</li>
+<li><input type="checkbox"><b>能口述</b>：漏斗宽松版 vs 严格版，你选哪个、为什么</li>
+<li><input type="checkbox">5 篇笔记转 🟢：窗口函数 3 篇 + CTE 1 篇 + 自连接 1 篇</li>
+<li><input type="checkbox">新建 <code>留存与漏斗模板.md</code></li>
+<li><input type="checkbox">错题本按归因表补完 3 周记录</li>
+<li><input type="checkbox">简历话术一句（带口径）</li>
+</ul>
+</div></div>
+
+<div class="hint g">
+<b>【建议】三周结束后立刻进入阶段二（Python pandas），别再加练 SQL。</b>
+SQL 在全国 JD 里要求率 72.5%、太原 46.6%，它是<b>门票</b>不是加价项 —— 达到「写得快且说得清口径」就够了。
+真正的加价项是 Python（太原 36.2% → 一线 63.1%）和 BI，时间应该往那边挪。
+</div>
+
+<div class="foot">
+数据环境：本机 MySQL 8.0.46 · 库 <code>sqlpractice</code> · 表 users(24) / events(440) / student(8) / score(12) / course(3) / employee(5)<br>
+行为日志建表脚本：<code>F:/allstudy/obsidian/sql/sql/附-练习库/MySQL行为日志表.sql</code>（可反复重跑）<br>
+本文档所有 SQL 与结果均于 2026-10-11 在本机实测通过；配套总清单见 <code>学习清单-数据分析岗.html</code>。
+</div>
+
+</div>
+</body>
+</html>
