@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学习清单 · 数据分析岗（基于 328 条 JD 实测）</title>
+<style>
+:root{--blue:#1a5fd6;--ink:#1a1d23;--ink2:#4a5160;--ink3:#8b93a1;--line:#e5e8ee;
+ --grn:#0e8a4a;--grnbg:#e9f7f0;--org:#c2680a;--orgbg:#fdf3e6;--red:#c0392b;--redbg:#fdecea;--bg:#f7f8fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.85 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+.hero{background:linear-gradient(135deg,#1a5fd6,#2b7ae0);border-radius:16px;padding:34px;color:#fff;margin-bottom:28px}
+.hero h1{margin:0 0 10px;font-size:26px;font-weight:700;line-height:1.4}
+.hero p{margin:0;font-size:14px;opacity:.93;line-height:1.7}
+h2{font-size:19px;margin:40px 0 14px;padding-left:12px;border-left:4px solid var(--blue)}
+h3{font-size:16px;margin:24px 0 8px}
+p{color:var(--ink2)}
+code{background:#f2f4f8;padding:1px 6px;border-radius:4px;font-size:12.5px;color:#b5286b;
+ font-family:ui-monospace,Consolas,monospace}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+ border-radius:10px;overflow:hidden;font-size:13.5px;margin:12px 0}
+th{background:#f2f5fa;text-align:left;padding:10px 12px;font-size:12.5px;color:var(--ink2);border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid #f0f2f6;color:var(--ink2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.hint{border-left:4px solid var(--blue);border-radius:8px;padding:13px 17px;font-size:13.5px;color:var(--ink2);margin:14px 0;background:#eef4ff}
+.hint.g{background:var(--grnbg);border-color:var(--grn)}
+.hint.o{background:var(--orgbg);border-color:var(--org)}
+.hint.r{background:var(--redbg);border-color:var(--red)}
+.hint b{color:var(--ink)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:14px 0}
+.quote{background:#fff;border:1px dashed #c9d4ea;border-radius:10px;padding:14px 18px;font-size:14px;color:var(--ink2);margin:12px 0}
+.quote b{color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-align:center}
+.card .num{font-size:26px;font-weight:800;color:var(--blue)}
+.card .num.red{color:var(--red)}.card .num.grn{color:var(--grn)}.card .num.org{color:var(--org)}
+.card .cap{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.pill{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;background:var(--grnbg);color:var(--grn)}
+.pill.p0{background:var(--redbg);color:var(--red)}
+.pill.p1{background:var(--orgbg);color:var(--org)}
+.pill.p2{background:#f0f2f6;color:var(--ink3)}
+.pill.px{background:#f0f2f6;color:var(--ink3);text-decoration:line-through}
+.stage{background:#fff;border:1px solid var(--line);border-radius:12px;padding:0;margin:14px 0;overflow:hidden}
+.stage .sh{background:#f2f5fa;padding:14px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.stage .sh .t{font-size:15px;font-weight:700;color:var(--ink)}
+.stage .sh .w{font-size:12.5px;color:var(--ink3)}
+.stage .sb{padding:16px 20px}
+.stage .sb dl{margin:0}
+.stage .sb dt{font-size:12.5px;color:var(--ink3);margin-top:10px;font-weight:600}
+.stage .sb dt:first-child{margin-top:0}
+.stage .sb dd{margin:2px 0 0;font-size:13.5px;color:var(--ink2)}
+.chk{list-style:none;padding:0;margin:8px 0}
+.chk li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink2);margin:8px 0;line-height:1.6}
+.chk input{margin-top:4px;width:15px;height:15px;flex-shrink:0;accent-color:var(--blue)}
+.up{color:var(--grn);font-weight:700}
+.down{color:var(--red);font-weight:700}
+.flat{color:var(--ink3)}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+@media(max-width:680px){table{font-size:12px}th,td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+<h1>我到底该学什么？<br>—— 328 条 JD 反推的学习清单</h1>
+<p>依据：<code>data/jd_dataset_v3.json</code> 328 条有效岗位（真实岗 309 / 标题党 19），太原真实岗 58 · 一线新一线 249<br>
+判定标准只有两条：<b>要求率高不高</b>（好不好找工作）、<b>提到它的岗位薪资高不高</b>（值不值钱）<br>
+生成日期：2026-10-11 ｜ 适用：大三在校 · 目标「数据分析」岗实习 → 毕业正式岗</p>
+</div>
+
+<h2>① 先给结论</h2>
+<div class="cards">
+<div class="card"><div class="num grn">Python</div><div class="cap">主攻 · 唯一能补的差距</div></div>
+<div class="card"><div class="num grn">BI 看板</div><div class="cap">补齐 · 溢价最高</div></div>
+<div class="card"><div class="num org">SQL</div><div class="cap">继续 · 目标换成"写得快"</div></div>
+<div class="card"><div class="num red">不学</div><div class="cap">Excel 深挖 / SPSS / 机器学习</div></div>
+</div>
+
+<div class="hint g">
+<b>【建议 1】太原本地，SQL 和 Python 是唯二有定价权的技能。</b>
+太原 58 条真实岗里，提到 SQL 的薪资中位 <b>8.5K</b>、没提的 <b>5.5K</b>；Python 同样 <b>8.5K vs 5.5K</b>。
+不是多 500 块，是 <b>+55%</b>。学这两个，是在本地市场里唯一能直接改价的操作。
+</div>
+<div class="hint g">
+<b>【建议 2】Python 是太原 → 一线落差最大的技能：36.2% → 63.1%（差 27 个百分点，统计显著）。</b>
+SQL 在太原已经 46.6%，属于"没有就出局、有了不加分"；Python 是"有了才够得着外面的岗位"。<b>先学 Python。</b>
+</div>
+<div class="hint r">
+<b>【建议 3】立刻砍掉三件事：Excel 深挖、SPSS、机器学习。</b>
+Excel 在全样本里是<b>负溢价</b>（提到它的岗位中位 14.5K，没提的反而 16.0K）——它是默认项，不是卖点；
+SPSS 十年从 33% 崩到 5%；机器学习对无经验者溢价仅 <b>+0.3K</b>（15.8 vs 15.5），基本等于没有。
+</div>
+
+<h2>② 数据怎么说话：技能溢价总表</h2>
+<p>「全量溢价」= 提到该技能的岗位薪资中位数 − 没提到的。正数说明这项技能被市场定价，负数说明它是低薪岗位的标配。</p>
+<table>
+<tr><th>技能</th><th>全量要求率<br><span style="font-weight:400;color:var(--ink3)">n=309</span></th><th>太原<br><span style="font-weight:400;color:var(--ink3)">n=58</span></th><th>一线新一线<br><span style="font-weight:400;color:var(--ink3)">n=249</span></th><th>全量溢价<br><span style="font-weight:400;color:var(--ink3)">有 vs 无</span></th><th>太原本地溢价</th><th>判定</th></tr>
+<tr><td><b>SQL</b></td><td>72.5%</td><td>46.6%</td><td>78.7%</td><td class="up">+3.5K</td><td class="up">+3.0K（8.5 vs 5.5）</td><td><span class="pill p0">P0 继续</span></td></tr>
+<tr><td><b>Python</b></td><td>57.6%</td><td>36.2%</td><td>63.1%</td><td class="up">+2.0K</td><td class="up">+3.0K（8.5 vs 5.5）</td><td><span class="pill p0">P0 主攻</span></td></tr>
+<tr><td><b>BI 可视化</b></td><td>53.4%</td><td>36.2%</td><td>57.4%</td><td class="up">+3.0K</td><td class="up">+1.5K（7.5 vs 6.0）</td><td><span class="pill p0">P0 补齐</span></td></tr>
+<tr><td>统计学 / 数据分析思维</td><td>67.0%</td><td>48.3%</td><td>71.5%</td><td class="up">+1.8K</td><td class="up">+2.0K（7.5 vs 5.5）</td><td><span class="pill p1">P1 够用即止</span></td></tr>
+<tr><td>Hive / 大数据</td><td>15.2%</td><td>5.2%</td><td>17.7%</td><td class="up">+2.5K</td><td class="flat">n=3 不可靠</td><td><span class="pill p2">P2 实习后补</span></td></tr>
+<tr><td>机器学习</td><td>14.9%</td><td>13.8%</td><td>15.3%</td><td class="flat">+0.3K</td><td class="flat">n=8 不可靠</td><td><span class="pill px">P3 不学</span></td></tr>
+<tr><td>Excel</td><td>36.9%</td><td>36.2%</td><td>36.9%</td><td class="down">−1.5K</td><td class="down">−1.0K</td><td><span class="pill px">停在当前水平</span></td></tr>
+</table>
+<div class="hint o">
+<b>读法：要求率决定"能不能进门"，溢价决定"进门拿多少"。</b>
+SQL 要求率最高但溢价不是最高 → 它是门票；Python + BI 要求率高且溢价高 → 它们才是加价项；
+Excel 要求率不低但溢价为负 → 会了不加分，不会才扣分。
+</div>
+
+<h2>③ 12 周学习路径</h2>
+<p>时间预算：工作日每晚 1.5h（课后到熄灯前），周末半天 4h → <b>每周约 11h，12 周约 130h</b>。
+这 130 小时的目标不是"学完"，是<b>产出 3 个能贴进简历的作品</b>。学得完学不完不重要，作品必须有。</p>
+
+<div class="stage">
+<div class="sh"><span class="t">阶段 1 · SQL：从"会写"到"写得快"</span><span class="w">第 1–3 周 · 约 33h</span></div>
+<div class="sb"><dl>
+<dt>学什么</dt>
+<dd>窗口函数（<code>ROW_NUMBER / RANK / LAG</code>）、CTE、自连接、行列转换；
+三条业务模板必须闭眼能写：<b>留存率</b>、<b>漏斗转化</b>、<b>环比/同比</b>。</dd>
+<dt>用什么</dt>
+<dd>本机 MySQL 的 <code>sqlpractice</code> 库（已建好，student/score/course/employee 四表）+ Obsidian SQL 库现有笔记。零成本。</dd>
+<dt>验收（做不到就别进下一阶段）</dt>
+<dd>不看资料、20 分钟内写出「近 7 日新用户的次日留存率」，结果能自己解释清楚。</dd>
+<dt>产出</dt>
+<dd>Obsidian SQL 库里 5 篇笔记状态从 🟡 转 🟢；一条能贴进简历的留存分析 SQL。</dd>
+</dl></div>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="t">阶段 2 · Python（pandas）：把已有数据重做一遍</span><span class="w">第 4–7 周 · 约 44h</span></div>
+<div class="sb"><dl>
+<dt>学什么</dt>
+<dd>pandas 读 CSV / 清洗缺失与重复 / <code>groupby</code> / <code>merge</code> / 透视表；matplotlib 出柱状图与折线图。<b>只学这些，不碰 sklearn。</b></dd>
+<dt>捷径（关键）</dt>
+<dd><b>不要另外找练习数据。</b>直接把这次 328 条 JD 的分析用 pandas 重写一遍 ——
+数据现成（<code>data/jd_dataset_v3.csv</code>）、结论已知、错了能立刻发现。学工具的同时产出作品，一举两得。</dd>
+<dt>验收</dt>
+<dd>一个 100 行以内的脚本完成：读 csv → 清洗 → 按城市分组统计技能率 → 出图 → 存结果文件。</dd>
+<dt>产出</dt>
+<dd><b>作品集 #3</b>：JD 技能分析的 Python 复现版（脚本 + 图表 + 一页说明）。</dd>
+</dl></div>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="t">阶段 3 · BI 看板：把分析做成能讲的东西</span><span class="w">第 8–10 周 · 约 33h</span></div>
+<div class="sb"><dl>
+<dt>学什么</dt>
+<dd>选一个：<b>FineBI 个人免费版</b>（国内岗更认）或 <b>Power BI Desktop</b>（免费）。做一个「城市 × 技能 × 薪资」交互看板。</dd>
+<dt>为什么值得单独花 3 周</dt>
+<dd>BI 全样本溢价 +3.0K、要求率 53.4%，而大多数人只停在"会用 Excel 画图"。能交付一个可交互看板，是应届生里最直观的差异点。</dd>
+<dt>验收</dt>
+<dd>能对着看板讲清楚：为什么这里用堆叠柱不用饼图、这张图回答什么业务问题、结论是什么。<b>讲不清 = 没做完。</b></dd>
+<dt>产出</dt>
+<dd><b>作品集 #4</b>：看板截图 + 3 分钟讲解稿。</dd>
+</dl></div>
+</div>
+
+<div class="stage">
+<div class="sh"><span class="t">阶段 4 · 统计与业务框架 + 打包投递</span><span class="w">第 11–12 周 · 约 22h</span></div>
+<div class="sb"><dl>
+<dt>学什么</dt>
+<dd>假设检验的基本逻辑、A/B 测试完整流程、指标体系怎么搭。<b>学到能口述，不推公式。</b></dd>
+<dt>验收</dt>
+<dd>能口述一次 A/B 测试从设计到结论的全过程（分流 → 指标 → 样本量 → 显著性 → 决策）。</dd>
+<dt>产出</dt>
+<dd>简历 v1 + 三个作品集页面整理成一份在线文档链接。</dd>
+</dl></div>
+</div>
+
+<h2>④ 明确不学清单</h2>
+<table>
+<tr><th>砍掉</th><th>数据理由</th><th>省下的时间去哪</th></tr>
+<tr><td><b>Excel 深挖</b>（透视表以外）</td><td>全样本溢价 <span class="down">−1.5K</span>，太原 <span class="down">−1.0K</span>。它出现在低薪岗里，是标配不是卖点。</td><td>转到 BI</td></tr>
+<tr><td><b>SPSS</b></td><td>2016 年 33% → 2026 年 5%，十年崩塌。教材还在教，市场已经不用。</td><td>转到 Python</td></tr>
+<tr><td><b>机器学习 / 算法</b></td><td>无经验者溢价仅 +0.3K；46 条算法岗多要求研究生或竞赛经历，投入产出比最差。</td><td>转到实习经历</td></tr>
+<tr><td><b>爬虫采数据</b></td><td>ACS 需无犯罪证明；且本次已论证「不是不能，是不值」——风险收益严重不对等。</td><td>—</td></tr>
+<tr><td><b>Hive / 大数据栈</b></td><td>要求率仅 15.1%，是「有经验后顺手学」的东西，不是入场券。</td><td>实习后跟项目学</td></tr>
+</table>
+
+<h2>⑤ AI 要学，但别当卖点</h2>
+<p>把 JD 里的 AI 要求分了三层，只看一线新一线内部（控制城市变量）：</p>
+<table>
+<tr><th>层级</th><th>含义</th><th>岗位数</th><th>薪资中位</th></tr>
+<tr><td>L3 研发层</td><td>懂原理、能搭模型</td><td>9</td><td>22.5K</td></tr>
+<tr><td>L1 传统 ML / 统计建模</td><td>2020 年前就有的建模能力</td><td>47</td><td>18.0K</td></tr>
+<tr><td>L0 无 AI 要求</td><td>—</td><td>168</td><td>16.0K</td></tr>
+<tr><td>L2 <b>应用层</b>（会用 AI 工具提效）</td><td>用大模型辅助 SQL / 清洗 / 写报告</td><td>25</td><td class="down">15.0K</td></tr>
+</table>
+<div class="hint r">
+<b>【建议 4】「会用 AI 工具」目前不但没有溢价，还略低于无 AI 要求的岗位（15.0K vs 16.0K）。</b>
+它正在变成人人都会的默认项 —— 强调它的岗位，往往是本身定价不高的岗位。
+所以：<b>要会用，但不要把「熟练使用 ChatGPT」写进简历技能栏当卖点。</b>
+正确用法是用它加速你学 SQL/Python（改语句、解释报错、造练习数据），但每一条产出必须自己跑通、能解释。
+</div>
+
+<h2>⑥ 实习节奏：先在太原拿第一段</h2>
+<div class="cards">
+<div class="card"><div class="num grn">68.1%</div><div class="cap">太原岗可投率（应届）</div></div>
+<div class="card"><div class="num">47.4%</div><div class="cap">一线新一线可投率</div></div>
+<div class="card"><div class="num">17</div><div class="cap">太原明确可应届的岗</div></div>
+<div class="card"><div class="num org">6.0K</div><div class="cap">太原薪资中位 vs 一线 16.5K</div></div>
+</div>
+<p>太原 58 条真实岗里，明确可应届 17 条、可能可 15 条、明确要经验的只有 15 条；一线 249 条里明确可应届 53 条、明确要经验 100 条。
+<b>寒假先在太原拿第一段经历（可投率最高、竞争最小），暑期再拿这段经历去冲一线。</b></p>
+<table>
+<tr><th>目标方向</th><th>岗位数</th><th>薪资中位</th><th>应届可投</th><th>建议</th></tr>
+<tr><td>商业 / 经营分析</td><td>31</td><td>18.8K</td><td>3 明确 + 4 可能</td><td>薪资最高但应届机会少，第二段实习再冲</td></tr>
+<tr><td>BI / 数仓 / 数据治理</td><td>37</td><td>16.8K</td><td>5 明确 + 3 可能</td><td><b>首选</b>：与阶段 3 学的 BI 直接对口</td></tr>
+<tr><td>分析师（通用）</td><td>116</td><td>15.0K</td><td>24 明确 + 28 可能</td><td><b>广投</b>：可投名额最多，拿来练手</td></tr>
+<tr><td>专员 / 助理</td><td>19</td><td>10.5K</td><td>5 明确 + 2 可能</td><td>备选，门槛低但天花板低</td></tr>
+</table>
+<div class="hint r">
+<b>明确避开：</b>本次样本里判出的 17 条标题党中，<b>数据标注型 3 条、岗位错配型 4 条、销售话术型 2 条、比价录入型 1 条</b>。
+数据标注岗尤其要躲 —— 薪资 2–3K，而且<b>不被 ACS 认作 ICT 专业岗</b>，做了等于白做一年。
+</div>
+
+<h2>⑦ 与 ACS / 澳洲路径的衔接</h2>
+<div class="hint">
+<b>【建议 5】实习结束那天，必须拿到带技能描述的雇主推荐信。</b>
+ACS 材料清单里能证明工作经验的只有它。要求信里写明：SQL 取数、Python 数据清洗、BI 看板交付、参与的业务指标 ——
+光写「在职期间表现良好」等于没用。岗位名尽量含 Analyst / Data 字样，避开「标注」「运营助理」。
+</div>
+<p>另外：学校大三下如果有 Python、数据挖掘、数据可视化类选修，优先选 —— 既能补 ICT 学分占比（当前推算毕业时约 27–28%，Minor 档够用），成绩单上也多几门能被审核员认的课。</p>
+
+<h2>⑧ 验收表（完成一项勾一项）</h2>
+<div class="panel">
+<ul class="chk">
+<li><input type="checkbox"><b>SQL</b>：不看资料 20 分钟内写出「近 7 日新用户次日留存率」，并能解释结果</li>
+<li><input type="checkbox">Obsidian SQL 库 5 篇笔记状态 🟡 → 🟢</li>
+<li><input type="checkbox"><b>Python</b>：100 行内脚本跑通「读 csv → 清洗 → 分组统计 → 出图 → 存结果」</li>
+<li><input type="checkbox"><b>作品集 #3</b>：JD 分析 Python 复现版（脚本 + 图 + 一页说明）</li>
+<li><input type="checkbox"><b>BI</b>：做完「城市 × 技能 × 薪资」看板，能讲清每张图回答什么问题</li>
+<li><input type="checkbox"><b>作品集 #4</b>：看板截图 + 3 分钟讲解稿</li>
+<li><input type="checkbox"><b>统计学</b>：口述一次完整 A/B 测试流程</li>
+<li><input type="checkbox">简历 v1 完成，三段作品整理成一个在线链接</li>
+<li><input type="checkbox">寒假投出太原岗 ≥ 15 份（避开标注 / 销售话术 / 比价录入）</li>
+<li><input type="checkbox">实习离职时拿到<b>带技能描述</b>的雇主推荐信</li>
+</ul>
+</div>
+
+<div class="hint o">
+<b>六级怎么并行：</b>每天早起 30 分钟只做听力（你的短板：四级听力 133 vs 阅读 171），
+不与上面 1.5 小时抢时间。技能学习产出的是作品，六级产出的是分数，两条线不冲突但别互相挤。
+</div>
+
+<div class="foot">
+数据源：<code>data/jd_dataset_v3.json</code>（328 条有效 JD，BOSS 直聘公开页面人工截图 + 本机 OCR，采集期 2026-10-09/10）<br>
+所有百分比与薪资中位数均由 <code>scripts/</code> 下的脚本从原始数据回算，未手写。复现：<code>python scripts/extract_dims.py</code><br>
+薪资为该 JD 标价区间的中位数，非实际到手；样本为短窗口横截面，仅代表采集期市场状态。
+</div>
+
+</div>
+</body>
+</html>

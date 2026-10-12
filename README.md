@@ -18,6 +18,7 @@
 | `scripts/build_report.py` | **报告生成器** —— 主报告所有数字由本脚本回算，不手写 |
 | `scripts/extract_dims.py` | 多维提取器（11 个维度 + 去重标记 + 显著性判定） |
 | `scripts/ocr_batch.py` / `merge_ocr.py` / `parse_jd.py` | OCR → 归并 → 技能解析 |
+| `学习清单-数据分析岗.html` | **由本报告结论反推的行动清单**：学什么 / 不学什么 / 12 周路径 / 验收表 |
 | `docs/采集方法与合规说明.md` | 数据怎么来的、为什么不爬、坑在哪 |
 | `docs/采集SOP-第二轮.md` | 第二轮采集规范 |
 | `data/external/lagou2016_DataAnalyst_589.xlsx` | **第三方对照数据**（2016-09 拉勾 589 条，**由第三方以爬虫方式采集**，仅用于 4.6 时间对比，未混入主样本） |
