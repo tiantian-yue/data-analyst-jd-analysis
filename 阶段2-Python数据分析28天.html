@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>阶段二 · Python 数据分析 28 天执行表</title>
+<style>
+:root{--blue:#1a5fd6;--ink:#1a1d23;--ink2:#4a5160;--ink3:#8b93a1;--line:#e5e8ee;
+ --grn:#0e8a4a;--grnbg:#e9f7f0;--org:#c2680a;--orgbg:#fdf3e6;--red:#c0392b;--redbg:#fdecea;--bg:#f7f8fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.85 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:40px 24px 80px}
+.hero{background:linear-gradient(135deg,#1a5fd6,#2b7ae0);border-radius:16px;padding:32px;color:#fff;margin-bottom:26px}
+.hero h1{margin:0 0 10px;font-size:25px;font-weight:700;line-height:1.4}
+.hero p{margin:0;font-size:14px;opacity:.93;line-height:1.7}
+h2{font-size:19px;margin:38px 0 12px;padding-left:12px;border-left:4px solid var(--blue)}
+h3{font-size:16px;margin:22px 0 8px}
+p{color:var(--ink2)}
+code{background:#f2f4f8;padding:1px 6px;border-radius:4px;font-size:12.5px;color:#b5286b;
+ font-family:ui-monospace,Consolas,monospace}
+pre{background:#1e2229;color:#e6e9ef;border-radius:10px;padding:14px 16px;overflow-x:auto;
+ font:12.5px/1.7 ui-monospace,Consolas,monospace;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+pre .c{color:#7d8799}
+pre .k{color:#79b8ff}
+.hint{border-left:4px solid var(--blue);border-radius:8px;padding:13px 17px;font-size:13.5px;color:var(--ink2);margin:14px 0;background:#eef4ff}
+.hint.g{background:var(--grnbg);border-color:var(--grn)}
+.hint.o{background:var(--orgbg);border-color:var(--org)}
+.hint.r{background:var(--redbg);border-color:var(--red)}
+.hint b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);
+ border-radius:10px;overflow:hidden;font-size:13.5px;margin:12px 0}
+th{background:#f2f5fa;text-align:left;padding:10px 12px;font-size:12.5px;color:var(--ink2);border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid #f0f2f6;color:var(--ink2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.week{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0}
+.week .wh{background:#f2f5fa;padding:13px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.week .wh .t{font-size:15px;font-weight:700;color:var(--ink)}
+.week .wh .w{font-size:12.5px;color:var(--ink3)}
+.week .wb{padding:6px 20px 16px}
+.day{border-bottom:1px dashed var(--line);padding:12px 0}
+.day:last-child{border-bottom:none}
+.day .dh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.day .dn{font-size:12px;font-weight:800;color:#fff;background:var(--blue);border-radius:5px;padding:1px 8px;flex-shrink:0}
+.day .dt{font-size:14px;font-weight:700;color:var(--ink)}
+.day .dm{font-size:12.5px;color:var(--ink3);margin-left:auto}
+.day ul{margin:8px 0 0;padding-left:22px}
+.day li{font-size:13.5px;color:var(--ink2);margin:4px 0}
+details{margin:10px 0;background:#fbfcfe;border:1px solid var(--line);border-radius:9px}
+details summary{cursor:pointer;padding:10px 16px;font-size:13px;font-weight:600;color:var(--blue);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▶ ";font-size:10px}
+details[open] summary::before{content:"▼ "}
+details .dbody{padding:0 16px 14px;border-top:1px solid var(--line)}
+.pill{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;background:var(--grnbg);color:var(--grn)}
+.pill.o{background:var(--orgbg);color:var(--org)}
+.pill.b{background:#eef4ff;color:var(--blue)}
+.chk{list-style:none;padding:0;margin:8px 0}
+.chk li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink2);margin:8px 0}
+.chk input{margin-top:5px;width:15px;height:15px;flex-shrink:0;accent-color:var(--blue)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+.card .num{font-size:22px;font-weight:800;color:var(--blue)}
+.card .cap{font-size:12px;color:var(--ink3)}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+@media(max-width:680px){table{font-size:12px}th,td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+<h1>阶段二 · Python 数据分析：28 天执行表</h1>
+<p>目标：<b>用一个脚本完成「读 CSV → 清洗 → 按城市分组统计技能率 → 出图 → 存结果」，并复现出主报告里的数字。</b><br>
+练习数据就用<b>你自己的 328 条 JD</b>（<code>data/jd_dataset_v3.csv</code>）—— 结论你已经知道了，跑出来的数对不上，说明代码写错了<br>
+每天 90 分钟 · 每周 5 天 · 共 20 个练习日（8 天缓冲）</p>
+</div>
+
+<h2>⓪ 先装环境（今晚，10 分钟）</h2>
+<p>环境我已经装好了：<code>pandas 3.0.6 + matplotlib 3.11.2</code>（装在 <code>C:\Users\25287\.workbuddy\binaries\python\envs\default</code>）。
+以后跑脚本统一用这个路径的 python，不要用系统里另一个 Python（它没装 pandas）：</p>
+<pre>C:\Users\25287\.workbuddy\binaries\python\envs\default\Scripts\python.exe 你的脚本.py</pre>
+<div class="hint o">
+<b>如果哪天换了电脑或环境坏了，重装命令：</b>
+<code>...envs\default\Scripts\python.exe -m pip install pandas matplotlib -i https://mirrors.aliyun.com/pypi/simple/</code>
+</div>
+
+<h2>① 你的最大优势：SQL 已经会了，pandas 只是换套写法</h2>
+<p>阶段一你练的每一个 SQL 概念，在 pandas 里都有一个对应物。<b>不要从头学 Python 语法，用对照表迁移。</b></p>
+<table>
+<tr><th>你已经会的 SQL</th><th>pandas 写法</th><th>说明</th></tr>
+<tr><td><code>SELECT c1, c2 FROM t</code></td><td><code>df[['c1','c2']]</code></td><td>选列</td></tr>
+<tr><td><code>WHERE 条件</code></td><td><code>df[df['city']=='太原']</code></td><td>布尔索引，<b>方括号里放条件</b></td></tr>
+<tr><td><code>AND / OR</code></td><td><code>&amp; / |</code></td><td><b>每个条件都要加括号</b>，这是最常犯的错</td></tr>
+<tr><td><code>ORDER BY x DESC</code></td><td><code>df.sort_values('x', ascending=False)</code></td><td>—</td></tr>
+<tr><td><code>COUNT(*) GROUP BY</code></td><td><code>df.groupby('city').size()</code></td><td>—</td></tr>
+<tr><td><code>SUM/AVG GROUP BY</code></td><td><code>df.groupby('city')['salary'].mean()</code></td><td>—</td></tr>
+<tr><td><code>HAVING</code></td><td>先 groupby 再布尔过滤</td><td>—</td></tr>
+<tr><td><code>JOIN</code></td><td><code>df.merge(other, on='key', how='left')</code></td><td>how 取值同 SQL</td></tr>
+<tr><td><b>窗口函数</b></td><td><code>df.groupby(...)['x'].transform('mean')</code></td><td><b>transform 就是窗口函数</b>：算完还是原来的行数</td></tr>
+<tr><td><code>LAG / 移动平均</code></td><td><code>df['x'].diff()</code> / <code>.rolling(7).mean()</code></td><td>对照阶段一 D3、D4</td></tr>
+<tr><td>行列转换</td><td><code>df.pivot_table(...)</code></td><td>对照阶段一 D13</td></tr>
+</table>
+<div class="hint g">
+<b>【建议】每天写 pandas 之前，先把这道题的 SQL 写出来。</b>
+你已经能用 SQL 做留存和漏斗了 —— pandas 不是新概念，是新语法。
+用「同一道题两种写法」的方式练，比刷 100 道 pandas 题快得多，而且面试时这一手非常加分。
+</div>
+
+<h2>② 第 4 周 · DataFrame 基本功（对照 SELECT / WHERE）</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：读数据 / 选行选列 / 缺失值 / 字符串解析</span><span class="w">第 16–20 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D16</span><span class="dt">把 JD 数据读进来，先"看"再"算"</span><span class="dm">60′</span></div>
+<ul>
+<li><code>pd.read_csv('data/jd_dataset_v3.csv', encoding='utf-8-sig')</code> —— 统一带 <code>utf-8-sig</code>：
+这个文件带 BOM，新版 pandas 能自动剥掉，但用 <code>csv</code> 模块或旧版 pandas 读会多出一个叫 <code>﻿id</code> 的怪列。
+读写都固定写它，一劳永逸</li>
+<li>看四件事：<code>df.shape</code>（多少行多少列）、<code>df.columns</code>、<code>df.head(3)</code>、<code>df.info()</code></li>
+<li>用 <code>df['city'].value_counts()</code> 看城市分布 —— 对照主报告的城市列表，看对不对得上</li>
+<li><b>注意：</b>CSV 里所有东西都是字符串（<code>is_valid</code> 是 '1' 不是 1），后面比较时要小心</li>
+</ul>
+<details open><summary>参考答案 + 实测输出（2026-10-12，本机 pandas 3.0.6）</summary><div class="dbody">
+<pre>import pandas as pd
+df = pd.read_csv('data/jd_dataset_v3.csv', encoding='utf-8-sig')
+print(df.shape)                      <span class="c"># (334, 35)</span>
+print(df['city'].value_counts().head(6))
+print((df['is_valid']==1).sum())     <span class="c"># 328 有效</span></pre>
+<pre>太原        74
+成都        32
+苏州        29
+长沙        29
+无锡        27
+广州        26</pre>
+<p>城市分布和主报告对上了，说明读对了。注意 <code>is_valid</code> 读进来是 <code>1</code>/<code>0</code> 而不是 <code>'1'</code>/<code>'0'</code>（pandas 自动推断），
+但 <code>flag</code> 列是字符串 <code>'True'</code>/<code>'False'</code> —— 过滤真实岗用
+<code>~df['flag'].astype(str).str.contains('True', na=False)</code>。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D17</span><span class="dt">选行选列：loc / iloc / 布尔索引</span><span class="dm">60′</span></div>
+<ul>
+<li>选出「太原 + 真实岗」的所有行（两个条件，注意括号）</li>
+<li>只用 <code>df[...]</code> 和 <code>df.loc[...]</code> 各写一遍，体会区别</li>
+<li>踩一次坑：把 <code>&amp;</code> 写成 <code>and</code>，或忘加括号 <code>df[a&gt;1 &amp; b&lt;2]</code>，看报什么错。
+实测报错是 <code>TypeError: unsupported operand type(s) for &amp;: 'int' and 'StringArray'</code> —— <b>记住它，以后一眼定位</b></li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D18</span><span class="dt">缺失值与去重</span><span class="dm">60′</span></div>
+<ul>
+<li><code>df.isna().sum()</code> 看每列缺多少 —— 你会发现 <code>company_size</code>、<code>welfare</code> 大面积为空</li>
+<li>想清楚：<b>空值要不要填？填什么？</b>比如 <code>company_size</code> 空着不能填 0，只能填「未知」</li>
+<li>去重：<code>drop_duplicates(subset=['title','company','city'])</code> —— 对照你在采集时手工做的去重</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D19</span><span class="dt">最关键的一课：把 "6-10K" 变成数字</span><span class="dm">75′</span></div>
+<ul>
+<li><code>salary</code> 是字符串："6-10K"、"3-8K"、"2-3K"。写个函数拆出 <code>low</code> / <code>high</code> / <code>mid</code>（中位）三个数值列</li>
+<li>用 <code>.str.extract()</code> 配合正则，或者 <code>.apply()</code> 自己写函数 —— <b>两种方法都写一遍</b></li>
+<li>对照主报告校验：太原真实岗薪资中位应该是 <b>6.0K</b>，一线新一线 <b>16.5K</b>。对不上就是你解析错了</li>
+<li>这一步是<b>所有 JD 分析的地基</b>，也是简历上能写的一件事</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D20</span><span class="dt">复盘：把这一周的函数默写一遍</span><span class="dm">45′</span></div>
+<ul>
+<li>不查资料写出：读 CSV / 选多条件行 / 看缺失 / 新增一列 / 去重</li>
+<li>错题本补归因（pandas 的报错和 SQL 完全不同，要重新积累）</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>③ 第 5 周 · 分组与连接（对照 GROUP BY / JOIN）</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：groupby / transform（=窗口函数）/ merge / pivot_table</span><span class="w">第 21–25 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D21</span><span class="dt">groupby：把报告里的技能频率表复现出来</span><span class="dm">75′</span></div>
+<ul>
+<li><code>skills</code> 列是 <code>SQL|Excel|数据分析</code> 这种竖线分隔的字符串 —— 先 <code>.str.split('|')</code> 再 <code>.explode()</code> 拆成一人一行</li>
+<li>然后 <code>groupby('技能').size()</code> 计数，除以总数得到百分比</li>
+<li><b>对照主报告校验</b>（真实岗 309 条）：SQL 应得 <b>72.5%</b>、Python <b>57.6%</b>、BI 可视化 <b>53.4%</b>、统计学 <b>67.0%</b>、Excel <b>36.9%</b></li>
+<li>数字对不上，通常是漏了"标题党"过滤（<code>flag</code> 列）或没去重</li>
+</ul>
+<details><summary>参考答案 + 实测输出</summary><div class="dbody">
+<pre>sk = real[['id','skills']].copy()
+sk['skill'] = sk['skills'].fillna('').str.split('|')
+sk = sk.explode('skill')
+sk = sk[sk['skill'].str.strip() != '']
+freq = (100 * sk.groupby('skill')['id'].nunique() / len(real)).round(1)
+print(freq.sort_values(ascending=False).head(10))</pre>
+<pre>数据分析    93.5
+业务沟通    82.2
+SQL      72.5   &lt;-- 与主报告一致
+统计学     67.0
+报表      57.6
+Python   57.6
+BI可视化   53.4
+逻辑思维    47.9
+数据挖掘    40.1
+业务理解    39.5</pre>
+<p><code>explode()</code> 是这题的钥匙：把 <code>['SQL','Excel']</code> 拆成两行，一行一个技能 ——
+SQL 里要做到这个得靠递归或数字辅助表，pandas 一行搞定。</p>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D22</span><span class="dt">transform = 窗口函数（你的阶段一白学了才怪）</span><span class="dm">60′</span></div>
+<ul>
+<li>给每一行加一列「所在城市的平均薪资」：<code>df.groupby('city_group')['mid'].transform('mean')</code></li>
+<li>再加一列「这个人比本市平均高/低多少」</li>
+<li>对照阶段一 D1–D4 的窗口函数笔记 —— <b>transform 保留行数，agg 压缩行数</b>，这个区别就是窗口函数 vs GROUP BY 的区别</li>
+<li>把这两句 SQL 也写出来做对照（<code>AVG(salary) OVER (PARTITION BY dept)</code>）</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D23</span><span class="dt">merge：把两张表拼起来</span><span class="dm">60′</span></div>
+<ul>
+<li>自己造一个「城市 → 是否一线」的小 DataFrame，merge 进主表</li>
+<li>四种 <code>how</code>（inner / left / right / outer）各试一次，看行数变化</li>
+<li><b>对照阶段一 D8</b>：用 <code>merge(how='left', indicator=True)</code> 找出匹配不上的行 —— 这就是 pandas 版的 LEFT JOIN IS NULL</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D24</span><span class="dt">pivot_table：城市 × 技能的透视</span><span class="dm">60′</span></div>
+<ul>
+<li>做一张「城市分组 × 6 个核心技能」的要求率透视表</li>
+<li>对照主报告的三层梯度表：太原 SQL <b>46.6%</b> / 一线 <b>78.7%</b>，太原 Python <b>36.2%</b> / 一线 <b>63.1%</b></li>
+<li>这一步做完，<b>主报告的核心结论你就能用自己的代码复现了</b> —— 这是作品集 #3 的主体</li>
+</ul>
+<details><summary>实测输出（应为）</summary><div class="dbody">
+<pre>            SQL  Python  BI可视化   统计学  Excel
+太原        46.6   36.2   36.2   48.3   36.2
+一线新一线    78.7   63.1   57.4   71.5   36.9</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D25</span><span class="dt">复盘 + 与 SQL 交叉验证</span><span class="dm">60′</span></div>
+<ul>
+<li>挑 3 个指标，<b>用 MySQL 写一遍、用 pandas 写一遍</b>，结果必须一致</li>
+<li>这一天的产出（SQL + pandas 对照脚本）非常值得单独放进作品集 —— 应届生里很少有人两种都会</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>④ 第 6 周 · 做一次完整的数据清洗</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：把 328 条原始数据洗成可分析状态，并复现报告结论</span><span class="w">第 26–30 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D26</span><span class="dt">写一个完整的清洗脚本（不是一行一行试）</span><span class="dm">75′</span></div>
+<ul>
+<li>从 <code>read_csv</code> 到输出干净 DataFrame，全部写进一个 <code>.py</code> 文件，用函数分段：<code>load()</code> / <code>parse_salary()</code> / <code>filter_real()</code> / <code>explode_skills()</code></li>
+<li>每段加一句注释说明「为什么要这一步」</li>
+<li><b>这才叫脚本，之前在命令行里一行行敲叫练习</b> —— 作品集要的是脚本</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D27</span><span class="dt">复现「技能溢价」—— 全清单里最值钱的那张表</span><span class="dm">75′</span></div>
+<ul>
+<li>对每个技能算：提到它的岗位薪资中位数 vs 没提到的</li>
+<li>对照：SQL <b>+3.5K</b>、BI <b>+3.0K</b>、Hive <b>+2.5K</b>、Python <b>+2.0K</b>、统计学 <b>+1.8K</b>、机器学习 <b>+0.3K</b>、Excel <b>−1.5K</b></li>
+<li><b>算出 Excel 是负的那一刻，你就会真正理解为什么不该在 Excel 上继续花时间</b></li>
+</ul>
+<details><summary>实测输出（应为）</summary><div class="dbody">
+<pre>SQL      有 16.0  无 12.5   差 +3.5
+BI可视化  有 16.0  无 13.0   差 +3.0
+Hive     有 17.5  无 15.0   差 +2.5
+Python   有 16.0  无 14.0   差 +2.0
+统计学    有 16.0  无 14.25  差 +1.8
+机器学习  有 15.8  无 15.5   差 +0.3   &lt;-- 几乎没有
+Excel    有 14.5  无 16.0   差 -1.5   &lt;-- 负的</pre>
+</div></details>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D28</span><span class="dt">复现城市三层梯度 + 应届可投率</span><span class="dm">60′</span></div>
+<ul>
+<li>太原 58 条真实岗 / 一线新一线 249 条；薪资中位 6.0K vs 16.5K</li>
+<li>应届可投率：太原 <b>68.1%</b>、一线 <b>47.4%</b>（<code>fresh_ok</code> 列：2=明确可、1=可能、0=需经验、−1=未知）</li>
+<li>这两个数字直接决定你寒假投哪里，自己跑出来比看报告印象深十倍</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D29</span><span class="dt">把结果存出去</span><span class="dm">45′</span></div>
+<ul>
+<li><code>to_csv(index=False)</code> 存三张结果表：技能频率、城市梯度、技能溢价</li>
+<li>存的时候<b>一定要写 <code>encoding='utf-8-sig'</code></b> —— 否则 Excel 打开是乱码（这是 D16 那个 BOM 坑的另一面）</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D30</span><span class="dt">复盘 · 建 Python 笔记区</span><span class="dm">45′</span></div>
+<ul>
+<li>在 Obsidian 里新建 <code>07-pandas/</code> 目录，按你现有的「填空骨架」格式建 4 篇：读写与选行 / 分组与 transform / merge 与透视 / 清洗与正则解析</li>
+<li><b>沿用 SQL 库那套规矩：③ 必须真跑通再写，🟡→🟢</b></li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>⑤ 第 7 周 · 出图 + 打包成作品集 #3</h2>
+<div class="week">
+<div class="wh"><span class="t">核心：matplotlib 中文不乱码 + 三张图 + 一页说明</span><span class="w">第 31–35 天</span></div>
+<div class="wb">
+
+<div class="day">
+<div class="dh"><span class="dn">D31</span><span class="dt">先解决中文乱码（别跳过，必踩）</span><span class="dm">45′</span></div>
+<ul>
+<li>直接画一个带中文标题的图，你会看到一堆方框 <b>□□□</b></li>
+<li>解决：<code>plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']</code> + <code>plt.rcParams['axes.unicode_minus'] = False</code></li>
+<li>第二句必须加，不然负号也是方块</li>
+<li>两张图都是我在你机器上实测生成的，左边是坑、右边是修完之后：</li>
+</ul>
+<img src="data/out/示例-中文乱码.png" style="max-width:70%;display:block;margin:8px 0;border:1px solid var(--line);border-radius:8px" alt="中文乱码示例">
+<img src="data/out/示例-成品图.png" style="max-width:100%;display:block;margin:8px 0;border:1px solid var(--line);border-radius:8px" alt="设置字体后的成品图">
+<p style="font-size:12.5px;color:var(--ink3)">右边这张就是 D32 要做出的效果 —— 分组条形图直接显示「太原 vs 一线」的技能差距，箱线图显示薪资鸿沟。</p>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D32</span><span class="dt">三张图：条形图 / 分组条形图 / 箱线图</span><span class="dm">75′</span></div>
+<ul>
+<li>图 1：技能要求率 Top10 横向条形图</li>
+<li>图 2：太原 vs 一线新一线的技能要求率<b>分组</b>条形图（这张最能说明"差距在哪"）</li>
+<li>图 3：薪资分布箱线图（按城市分组）—— 直观看出太原 6K 和一线 16.5K 的鸿沟。
+<b>又一个版本坑：</b>新版 matplotlib（≥3.9）删掉了 <code>labels</code> 参数，写 <code>boxplot(..., tick_labels=[...])</code>，
+网上老教程会报 <code>unexpected keyword argument 'labels'</code></li>
+<li>每张图都要有标题、轴标签、单位</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D33</span><span class="dt">合成一页图 + 一句结论</span><span class="dm">60′</span></div>
+<ul>
+<li><code>plt.subplots(1,3)</code> 把三张图并排放一张图里，<code>plt.tight_layout()</code></li>
+<li>存成 <code>out/jd_skills.png</code>（300 dpi）</li>
+<li>在图的下方写一句结论：<b>「太原与一线在 SQL/Python/统计学上的差距均达统计显著，Python 是唯一能补的差距」</b></li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D34</span><span class="dt">打包成作品集 #3</span><span class="dm">60′</span></div>
+<ul>
+<li>目录结构：<code>jd-analysis-py/</code> 里有 <code>analysis.py</code>、<code>out/*.png</code>、<code>out/*.csv</code>、<code>README.md</code></li>
+<li>README 写四段：数据来源（328 条 JD + 采集方式）/ 怎么跑（一行命令）/ 得出什么结论 / 复现了哪些数字</li>
+<li><b>关键：README 里必须写清"合规采集"这件事</b> —— 这是你的加分项，也是别人抄不走的</li>
+</ul>
+</div>
+
+<div class="day">
+<div class="dh"><span class="dn">D35</span><span class="dt">验收：不看资料重写核心脚本</span><span class="dm">45′</span></div>
+<ul>
+<li>计时 <b>40 分钟</b>：从 CSV 到三张结果表，不许翻笔记</li>
+<li>跑出来的数字必须和主报告一致（SQL 72.5% / 太原薪资中位 6.0K / Excel 溢价 −1.5K）</li>
+</ul>
+</div>
+
+</div></div>
+
+<h2>⑥ 四个必踩的坑（提前知道，能省 3 小时）</h2>
+<table>
+<tr><th>坑</th><th>现象</th><th>解法</th></tr>
+<tr><td><b>CSV 的 BOM</b></td><td>用 csv 模块/旧版 pandas 读，第一列叫 <code>﻿id</code> 选不出来</td><td>读写都固定 <code>encoding='utf-8-sig'</code>（新版 pandas 读能自动剥，但别赌版本）</td></tr>
+<tr><td><b>多条件忘加括号</b></td><td><code>df[a&gt;1 &amp; b&lt;2]</code> 报 <code>TypeError: unsupported operand type(s) for &amp;</code></td><td>写成 <code>df[(a&gt;1) &amp; (b&lt;2)]</code></td></tr>
+<tr><td><b>中文全是方块</b></td><td>图上标题显示 □□□（实测见 D31 左图）</td><td>设 YaHei 字体 + <code>axes.unicode_minus=False</code></td></tr>
+<tr><td><b>boxplot 的 labels 没了</b></td><td>报 <code>unexpected keyword argument 'labels'</code></td><td>新版 matplotlib 用 <code>tick_labels=</code></td></tr>
+<tr><td><b>存 CSV 后 Excel 乱码</b></td><td>用 pandas 存的文件 Excel 打开是乱码</td><td><code>to_csv(..., encoding='utf-8-sig')</code></td></tr>
+</table>
+
+<h2>⑦ 验收表</h2>
+<div class="week"><div class="wb" style="padding-top:14px">
+<ul class="chk">
+<li><input type="checkbox"><b>D35 计时通过</b>：40 分钟内从 CSV 跑到三张结果表，不看笔记</li>
+<li><input type="checkbox"><b>数字对得上</b>：SQL 72.5% / Python 57.6% / BI 53.4% / Excel 36.9%</li>
+<li><input type="checkbox"><b>数字对得上</b>：太原薪资中位 6.0K、一线 16.5K；太原可投率 68.1%、一线 47.4%</li>
+<li><input type="checkbox"><b>溢价复现</b>：Excel 是负的（−1.5K）、机器学习接近 0（+0.3K）</li>
+<li><input type="checkbox">能口述 <code>transform</code> 和 <code>agg</code> 的区别（= 窗口函数 vs GROUP BY）</li>
+<li><input type="checkbox">能口述 <code>merge</code> 的四种 how 分别对应什么</li>
+<li><input type="checkbox">有一份 SQL + pandas 对照脚本（同题两种写法）</li>
+<li><input type="checkbox">三张图 + 一页合成图，中文不乱码</li>
+<li><input type="checkbox">作品集 #3 目录建好，README 写清数据来源与合规采集</li>
+<li><input type="checkbox">Obsidian <code>07-pandas/</code> 下 4 篇笔记，至少 2 篇转 🟢</li>
+</ul>
+</div></div>
+
+<div class="hint g">
+<b>【建议】阶段二结束后直接进入阶段三（BI 看板），不要再去刷 pandas 进阶。</b>
+pandas 学到"能清洗 + 能聚合 + 能出图"就够用了，<code>MultiIndex</code>、<code>applymap</code>、性能优化这些在工作里用到再查。
+你的目标是<b>拿到实习</b>，不是成为 pandas 专家 —— 时间要花在能写进简历的产出上。
+</div>
+
+<div class="foot">
+环境：<code>C:\Users\25287\.workbuddy\binaries\python\envs\default</code>（Python 3.13.14 · pandas 3.0.6 · matplotlib 3.11.2，2026-10-12 已装好）<br>
+数据源：<code>data/jd_dataset_v3.csv</code>（334 行 × 35 列）· 校验基准为主报告 <code>数据分析岗JD实证分析.html</code><br>
+本文档所有代码与数字均于 2026-10-12 在本机实测通过 · 配套：<code>阶段1-SQL进阶21天.html</code> · <code>学习清单-数据分析岗.html</code>
+</div>
+
+</div>
+</body>
+</html>
