@@ -261,6 +261,65 @@ def bar_rows(items, maxv, colors, unit="条"):
 
 TOT = N_REAL
 tech_html = bar_rows([(n, c, pct(c, N_REAL)) for n, c in TECH_TOP], MAX_CNT, COLORS)
+
+# ---------------- SVG 图表（内联生成：离线可看、可打印，数字由数据集回算，不手写） ----------------
+
+def _svg_hbar(data, width=820, row_h=36, pad_top=8):
+    """横向条形图。data = [(name, cnt, pct)]；SQL 一项红色高亮。"""
+    left = 116
+    right_pad = 178
+    axis_w = width - left - right_pad
+    h = pad_top + len(data) * row_h + 4
+    maxp = max(p for _, _, p in data) or 1
+    parts = []
+    for i, (name, cnt, p) in enumerate(data):
+        y = pad_top + i * row_h
+        w = max(2, round(p / maxp * axis_w))
+        hot = (name == "SQL")
+        color = "#c0392b" if hot else COLORS[i % len(COLORS)]
+        parts.append(f'<text x="{left-12}" y="{y+18}" text-anchor="end" font-size="13" '
+                     f'fill="{"#1a1d23" if hot else "#4a5160"}" font-weight="{"700" if hot else "400"}">{name}</text>')
+        parts.append(f'<rect x="{left}" y="{y+6}" width="{axis_w}" height="20" rx="4" fill="#f0f2f6"/>')
+        parts.append(f'<rect x="{left}" y="{y+6}" width="{w}" height="20" rx="4" fill="{color}"/>')
+        parts.append(f'<text x="{left+w+9}" y="{y+21}" font-size="12.5" fill="#4a5160" '
+                     f'font-weight="{"700" if hot else "400"}">{cnt} 条 · {p}%</text>')
+    return (f'<svg viewBox="0 0 {width} {h}" width="100%" xmlns="http://www.w3.org/2000/svg" '
+            f'role="img" aria-label="技能频次Top10条形图">' + "".join(parts) + "</svg>")
+
+
+def _svg_tier3(width=820):
+    """城市三层梯度 × 核心技能分组条形图（占各层真实岗位百分比）。"""
+    tiers = [("太原", TY_REAL, "#c2680a"), ("新一线", NT1_REAL, "#5a9aec"),
+             ("传统一线", T1_REAL, "#1a5fd6")]
+    skills = ["SQL", "Python", "BI可视化", "统计学"]
+    left = 116
+    axis_w = width - left - 64
+    bar_gap = 24
+    group_h = 18 + len(tiers) * bar_gap + 14
+    h = 34 + len(skills) * group_h + 6
+    parts = []
+    lx = left
+    for tname, _, color in tiers:
+        parts.append(f'<rect x="{lx}" y="10" width="14" height="14" rx="3" fill="{color}"/>')
+        parts.append(f'<text x="{lx+20}" y="22" font-size="12.5" fill="#4a5160">{tname}</text>')
+        lx += 104
+    for si, sk in enumerate(skills):
+        gy = 34 + si * group_h
+        parts.append(f'<text x="{left-12}" y="{gy+22}" text-anchor="end" font-size="13.5" '
+                     f'fill="#1a1d23" font-weight="600">{sk}</text>')
+        for ti, (tname, sub, color) in enumerate(tiers):
+            k, n = skill_rate(sub, sk)
+            p = pct(k, n)
+            by = gy + 18 + ti * bar_gap
+            w = max(2, round(p / 100 * axis_w))
+            parts.append(f'<rect x="{left}" y="{by}" width="{axis_w}" height="16" rx="4" fill="#f0f2f6"/>')
+            parts.append(f'<rect x="{left}" y="{by}" width="{w}" height="16" rx="4" fill="{color}"/>')
+            parts.append(f'<text x="{left+w+7}" y="{by+13}" font-size="11.5" fill="#4a5160">{p}%</text>')
+    return (f'<svg viewBox="0 0 {width} {h}" width="100%" xmlns="http://www.w3.org/2000/svg" '
+            f'role="img" aria-label="城市三层梯度技能对比">' + "".join(parts) + "</svg>")
+
+
+chart_top_html = _svg_hbar([(n, c, pct(c, N_REAL)) for n, c in TECH_TOP])
 TOT = len(_av)
 sal_html = bar_rows([(n, c, p) for n, c, p in bin_rows], MAXBIN, SALARY_COLORS)
 TOT = N_REAL
@@ -471,6 +530,8 @@ _TY_SQL, _NT_SQL, _T1_SQL = (_pc(TY_REAL, "SQL"), _pc(NT1_REAL, "SQL"), _pc(T1_R
 _TY_PY, _NT_PY, _T1_PY = (_pc(TY_REAL, "Python"), _pc(NT1_REAL, "Python"), _pc(T1_REAL, "Python"))
 _TY_MED, _NT_MED, _T1_MED = _med(TY_REAL), _med(NT1_REAL), _med(T1_REAL)
 
+chart_tier3_html = _svg_tier3()
+
 html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -528,7 +589,8 @@ html = f"""<!DOCTYPE html>
 
 <h3>4.1 技术技能频次（{N_REAL} 条真实岗位，全国口径）</h3>
 <div class="panel">
-{tech_html}
+{chart_top_html}
+<p style="font-size:12.5px;color:#8b93a1;margin:10px 0 0">图 1 · 技术技能要求频次 Top10（占真实岗位百分比；SQL 出现率最高，红色高亮）</p>
 </div>
 <div class="hint">{gen_txt} —— 这些是<b>真岗和标题党都会写的套话，不可作为学习目标</b>。
 真正可执行的学习信号在上表。<span class="tag">已剔除 {N_FAKE} 条标题党后计算</span></div>
@@ -583,6 +645,10 @@ Python 差距 {ty_py}% → {fs_py}%（+{fs_py-ty_py}）方向一致但误差带�
 <h3>4.3 城市三层梯度：太原 → 新一线 → 传统一线 <span class="tag">补采后新增</span></h3>
 <p>第二轮补采后，新一线城市样本从 0 涨到 {len(NT1_REAL)} 条真实岗位，第一次有条件把原来的
 「一线/新一线」拆成两层看。拆开之后呈现的是一条<b>连续梯度</b>，而不是简单的「太原 vs 外地」：</p>
+<div class="panel">
+{chart_tier3_html}
+<p style="font-size:12.5px;color:#8b93a1;margin:10px 0 0">图 2 · 城市三层梯度 × 四项核心技术技能（占各层真实岗位百分比）—— SQL 与 Python 的落差一眼可见</p>
+</div>
 <table>
 <tr><th>层级</th><th>真实岗位</th><th>标题党占比</th><th>薪资中位</th><th>SQL</th><th>Python</th><th>BI 可视化</th><th>统计学</th></tr>
 {TIER3_ROWS}
